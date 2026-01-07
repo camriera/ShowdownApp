@@ -16,31 +16,38 @@ Bring the beloved tabletop baseball simulation to mobile devices with:
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│         Mobile App (React Native)        │
-│  ┌─────────┐ ┌─────────┐ ┌─────────────┐ │
-│  │   UI    │ │  Redux  │ │ Game Engine │ │
-│  │ Screens │ │  Store  │ │   Logic     │ │
-│  └─────────┘ └─────────┘ └─────────────┘ │
-└─────────────────────────────────────────┘
-              │ HTTP/REST │
-┌─────────────────────────────────────────┐
-│        Backend API (Python)             │
-│  ┌─────────────────────────────────────┐ │
-│  │  mlb_showdown_card_bot (forked)     │ │
-│  │  - Player card generation           │ │
-│  │  - Chart calculations               │ │
-│  │  - Classic vs Expanded rules        │ │
-│  └─────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│   Mobile App (React Native + Expo)       │
+│  ┌────────────┐  ┌───────────────────┐   │
+│  │  Screens   │  │   Game Engine     │   │
+│  │  Components│  │   (Pure TS Logic) │   │
+│  └────────────┘  └───────────────────┘   │
+└──────────────────────────────────────────┘
+              │ HTTPS/REST │
+┌──────────────────────────────────────────┐
+│    Netlify Functions (Serverless)        │
+│  ┌────────────────────────────────────┐  │
+│  │  /api/cards/generate  (POST)       │  │
+│  │  /api/cards/search    (GET)        │  │
+│  └────────────────────────────────────┘  │
+└──────────────────────────────────────────┘
+              │ PostgreSQL │
+┌──────────────────────────────────────────┐
+│  Neon PostgreSQL (Serverless DB)         │
+│  - player_cards (cached card data)       │
+│  - game_sessions (save/resume)           │
+│  - rosters (custom teams)                │
+└──────────────────────────────────────────┘
 ```
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed system design.
 
 ## ⚡ Quick Start
 
 ### Prerequisites
 - Node.js 18+
-- Python 3.10+
-- Expo CLI
+- Neon PostgreSQL account (free tier)
+- Expo Go app on iOS/Android
 - Git
 
 ### 1. Clone the Repository
@@ -49,27 +56,42 @@ git clone git@github.com:camriera/ShowdownApp.git
 cd ShowdownApp
 ```
 
-### 2. Setup Mobile App
+### 2. Install Dependencies
 ```bash
-cd mobile
-npm install
-npm start
+npm install           # Install root dependencies
+cd mobile && npm install && cd ..
 ```
 
-### 3. Setup Backend API
+### 3. Configure Environment
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+cp .env.example .env
+# Edit .env and add your Neon PostgreSQL DATABASE_URL
 ```
 
-### 4. Run on Device
+### 4. Setup Database
+```bash
+npm run db:migrate    # Run schema.sql on Neon
+```
+
+### 5. Start Development Servers
+```bash
+npm run dev           # Starts mobile app + Netlify functions
+# Or separately:
+npm run dev:mobile    # Mobile only (port 8081)
+npm run dev:functions # Functions only (port 8888)
+```
+
+### 6. Run on Device
 ```bash
 # Scan QR code with Expo Go app
 # Or run on simulator:
+cd mobile
 npm run ios     # iOS simulator
 npm run android # Android emulator
 ```
+
+### Next Steps
+See [NEXT_STEPS.md](./NEXT_STEPS.md) for development checklist and roadmap.
 
 ## 🎮 Game Features
 
@@ -97,24 +119,34 @@ npm run android # Android emulator
 
 ```
 ShowdownApp/
-├── mobile/                 # React Native app
+├── mobile/                    # React Native app (Expo + TypeScript)
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── screens/        # Screen-level components
-│   │   ├── engine/         # Game logic
-│   │   ├── store/          # Redux state management
-│   │   └── models/         # TypeScript interfaces
-│   └── __tests__/          # Mobile app tests
+│   │   ├── components/        # Reusable UI components
+│   │   ├── screens/           # Screen-level components
+│   │   ├── engine/            # Game logic (GameEngine.ts)
+│   │   ├── models/            # TypeScript interfaces
+│   │   ├── api/               # API client modules
+│   │   └── utils/             # Helper functions
+│   └── __tests__/             # Mobile app tests
 │
-├── backend/                # Python FastAPI server
-│   ├── app/
-│   │   ├── api/            # REST endpoints
-│   │   ├── services/       # Business logic
-│   │   └── schemas/        # Pydantic models
-│   └── mlb_showdown_bot/   # Forked card generation
+├── netlify/
+│   └── functions/             # Serverless backend (TypeScript)
+│       ├── cards/             # Card generation/search endpoints
+│       ├── games/             # Game session endpoints (future)
+│       ├── rosters/           # Roster management (future)
+│       └── utils/             # Database utilities
 │
-├── docs/                   # Documentation
-└── shared/                 # Shared types/constants
+├── database/
+│   └── schema.sql             # PostgreSQL schema
+│
+├── docs/                      # Documentation
+│   ├── REQUIREMENTS.md        # Full requirements
+│   ├── GAME_RULES.md          # MLB Showdown mechanics
+│   └── API.md                 # Backend API docs
+│
+├── NEXT_STEPS.md              # Development checklist
+├── ARCHITECTURE.md            # Technical architecture
+└── AGENTS.md                  # AI development guide
 ```
 
 ## 🎯 Development Roadmap

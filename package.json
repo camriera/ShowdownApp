@@ -1,0 +1,40 @@
+{
+  "name": "showdown-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MLB Showdown Simulator - Mobile recreation of the classic baseball card game",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:camriera/ShowdownApp.git"
+  },
+  "author": "Cam Riera",
+  "license": "MIT",
+  "workspaces": [
+    "mobile"
+  ],
+  "scripts": {
+    "dev:mobile": "cd mobile && npm start",
+    "dev:functions": "netlify dev",
+    "dev": "concurrently \"npm:dev:mobile\" \"npm:dev:functions\"",
+    "build": "cd mobile && npm run build",
+    "test": "cd mobile && npm test",
+    "lint": "cd mobile && npm run lint",
+    "deploy": "netlify deploy --prod",
+    "db:migrate": "psql $DATABASE_URL < database/schema.sql"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.4.1",
+    "@types/node": "^20.10.5",
+    "@types/pg": "^8.10.9",
+    "concurrently": "^8.2.2",
+    "netlify-cli": "^17.10.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
