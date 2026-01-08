@@ -30,6 +30,52 @@ export class GameEngine {
     return { ...this.state };
   }
 
+  public getPitcherFatigueInfo(): {
+    pitcher: PitcherCard;
+    baseControl: number;
+    currentControl: number;
+    fatiguePenalty: number;
+    inningsPitched: number;
+    ipRating: number;
+    isFatigued: boolean;
+  } {
+    const pitcher = this.getCurrentPitcher();
+    const fatiguePenalty = this.calculateFatiguePenalty(pitcher, this.state.pitcherBattersFaced);
+    const inningsPitched = this.state.pitcherBattersFaced / 3;
+    
+    return {
+      pitcher,
+      baseControl: pitcher.command,
+      currentControl: pitcher.command - fatiguePenalty,
+      fatiguePenalty,
+      inningsPitched,
+      ipRating: pitcher.ip,
+      isFatigued: fatiguePenalty > 0,
+    };
+  }
+
+  public resetGame(): void {
+    this.state = {
+      gameId: `game_${Date.now()}`,
+      homeTeam: this.state.homeTeam,
+      awayTeam: this.state.awayTeam,
+      inning: 1,
+      isTopOfInning: true,
+      outs: 0,
+      score: { home: 0, away: 0 },
+      currentPhase: 'PITCH' as GamePhase,
+      currentBatterIndex: 0,
+      currentAdvantage: null,
+      lastPitchRoll: null,
+      lastPitchResult: null,
+      lastSwingRoll: null,
+      bases: { first: null, second: null, third: null },
+      pitcherBattersFaced: 0,
+      isGameOver: false,
+      winner: null,
+    };
+  }
+
   public executePitchPhase(roll: number): { pitchResult: number; advantage: Advantage } {
     const pitcher = this.getCurrentPitcher();
     const batter = this.getCurrentBatter();
