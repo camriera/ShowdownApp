@@ -180,24 +180,25 @@ export const GameScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Middle Section: Field + Dice (Scaled Responsively) */}
+      {/* Middle Section: Field (Scaled Responsively) */}
       <View style={styles.middleSection}>
         <BaseballDiamond 
           bases={gameState.bases} 
           onBaseClick={(card) => setSelectedCard(card)}
           scale={DIAMOND_SCALE}
         />
-        
+      </View>
+
+      {/* Bottom Section: Dice + Matchup */}
+      <View style={styles.bottomSection}>
         <View style={styles.diceContainer}>
           <DiceRoller 
             onRoll={handleDiceRoll} 
             disabled={gameState.isGameOver}
+            scale={Math.max(0.8, DIAMOND_SCALE)}
           />
         </View>
-      </View>
 
-      {/* Bottom Section: Matchup */}
-      <View style={styles.bottomSection}>
         <View style={styles.matchupSection}>
           <View style={styles.phaseSection}>
             <Text style={styles.phaseTitle}>
@@ -291,11 +292,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center', 
     alignItems: 'center',
     position: 'relative',
-    overflow: 'hidden', 
   },
   bottomSection: {
-    borderTopWidth: 1,
-    borderTopColor: '#333',
     backgroundColor: COLORS.background,
     paddingBottom: SPACING.xs,
   },
@@ -321,8 +319,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   diceContainer: {
-    marginTop: -20,
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: SPACING.sm, // Spacing between dice and matchup
     zIndex: 20, 
   },
   

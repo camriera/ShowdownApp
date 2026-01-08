@@ -34,7 +34,7 @@ export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseC
   };
 
   return (
-    <View style={[styles.container, { transform: [{ scale }] }]}>
+    <View style={[styles.container, { transform: [{ scale }], height: 360 * scale }]}>
       <View style={styles.fieldArea}>
         
         {/* Card Slots (Underneath bases) */}

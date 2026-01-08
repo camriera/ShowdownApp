@@ -17,12 +17,13 @@ import { COLORS, SHADOWS } from '../constants/theme';
 interface DiceRollerProps {
   onRoll: (value: number) => void;
   disabled?: boolean;
+  scale?: number;
 }
 
 const D20_SIZE = 80;
 const D20_COLOR = COLORS.primary;
 
-export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false }) => {
+export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false, scale: propScale = 1 }) => {
   const [displayValue, setDisplayValue] = useState<string>('d20');
   const [isRolling, setIsRolling] = useState(false);
   
@@ -118,7 +119,7 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { transform: [{ scale: propScale }] }]}>
       <TouchableOpacity
         onPress={handleRoll}
         disabled={disabled || isRolling}
