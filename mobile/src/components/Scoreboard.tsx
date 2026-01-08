@@ -45,7 +45,6 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         </View>
         
         <View style={styles.outsContainer}>
-          <Text style={styles.outsLabel}>OUTS</Text>
           <View style={styles.outsDots}>
             {[0, 1, 2].map((i) => (
               <View
@@ -80,10 +79,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
-    padding: SPACING.sm,
-    borderBottomWidth: 4,
+    paddingHorizontal: SPACING.sm,
+    borderBottomWidth: 3,
     borderBottomColor: COLORS.fieldGreen,
-    height: 80, // Constrained height
+    height: 60, // Reduced from 80
     ...SHADOWS.medium,
   },
   teamContainer: {
@@ -91,12 +90,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    borderRadius: BORDER_RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
     height: '100%',
   },
   activeTeamContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderBottomWidth: 2,
     borderBottomColor: COLORS.textGold,
   },
@@ -105,70 +103,63 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   teamName: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm, // Reduced from md
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   battingIndicator: {
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: 8, // Reduced from 10
+    fontWeight: '900',
     color: COLORS.success,
-    marginTop: 2,
+    marginTop: 1,
   },
   score: {
-    fontSize: 32,
+    fontSize: 24, // Reduced from 32
     fontWeight: 'bold',
     color: COLORS.textSecondary,
-    marginLeft: SPACING.sm,
+    marginLeft: SPACING.xs,
     fontVariant: ['tabular-nums'],
   },
   activeScore: {
     color: COLORS.textGold,
   },
   centerInfo: {
-    width: 80,
+    width: 60, // Reduced from 80
     alignItems: 'center',
     justifyContent: 'center',
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
-    height: '80%',
+    height: '70%',
   },
   inningBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   inningArrow: {
-    fontSize: 14,
+    fontSize: 10, // Reduced from 14
     color: COLORS.textGold,
-    marginRight: 4,
+    marginRight: 2,
   },
   inningNumber: {
-    fontSize: 20,
+    fontSize: 16, // Reduced from 20
     fontWeight: 'bold',
     color: COLORS.textPrimary,
   },
   outsContainer: {
     alignItems: 'center',
   },
-  outsLabel: {
-    fontSize: 8,
-    color: COLORS.textSecondary,
-    fontWeight: 'bold',
-    marginBottom: 2,
-    letterSpacing: 1,
-  },
   outsDots: {
     flexDirection: 'row',
-    gap: 4,
+    gap: 3,
   },
   outDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6, // Reduced from 8
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#444',
   },
   outDotFilled: {

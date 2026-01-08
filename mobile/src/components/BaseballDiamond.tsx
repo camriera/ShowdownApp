@@ -1,73 +1,121 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { BaseRunners } from '../models/Game';
-import { COLORS, SHADOWS } from '../constants/theme';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { BaseRunners, HitterCard } from '../models/Game';
+import { COLORS, SHADOWS, SPACING } from '../constants/theme';
 
 interface BaseballDiamondProps {
   bases: BaseRunners;
+  onBaseClick?: (card: HitterCard) => void;
+  scale?: number;
 }
 
 // Precise Geometry Constants
-const FIELD_SIZE = 220;
-const INFIELD_SIDE = 124; // Side length of the square
-const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2); // ~87.7px from center
-const BASE_SIZE = 14;
+const FIELD_SIZE = 260; 
+const INFIELD_SIDE = 146;
+const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2);
+const BASE_SIZE = 16;
 const CENTER = FIELD_SIZE / 2;
 
-export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases }) => {
+// Card Slot Constants
+const SLOT_WIDTH = 30;
+const SLOT_HEIGHT = 42;
+
+export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseClick, scale = 1 }) => {
   const getRunnerName = (runner: { name: string } | null) => {
     if (!runner) return '';
     const parts = runner.name.split(' ');
     return parts[parts.length - 1].toUpperCase();
   };
 
+  const handleBasePress = (runner: HitterCard | null) => {
+    if (runner && onBaseClick) {
+      onBaseClick(runner);
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { transform: [{ scale }] }]}>
       <View style={styles.fieldArea}>
         
+        {/* Card Slots (Underneath bases) */}
+        {/* 2nd Base Slot */}
+        <TouchableOpacity 
+          style={[styles.cardSlot, styles.slotSecond]} 
+          onPress={() => handleBasePress(bases.second)}
+          disabled={!bases.second}
+        />
+        
+        {/* 3rd Base Slot */}
+        <TouchableOpacity 
+          style={[styles.cardSlot, styles.slotThird]} 
+          onPress={() => handleBasePress(bases.third)}
+          disabled={!bases.third}
+        />
+        
+        {/* 1st Base Slot */}
+        <TouchableOpacity 
+          style={[styles.cardSlot, styles.slotFirst]} 
+          onPress={() => handleBasePress(bases.first)}
+          disabled={!bases.first}
+        />
+
+
         {/* Infield Dirt */}
-        <View style={styles.infieldDirt}>
+        <View style={styles.infieldDirt} pointerEvents="none">
            <View style={styles.infieldGrass} />
         </View>
 
         {/* Pitcher's Mound */}
-        <View style={styles.mound}>
+        <View style={styles.mound} pointerEvents="none">
            <View style={styles.rubber} />
         </View>
 
         {/* Bases */}
+        
         {/* 2nd Base (Top) */}
-        <View style={[styles.baseContainer, styles.posSecond]}>
+        <TouchableOpacity 
+          style={[styles.baseContainer, styles.posSecond]}
+          onPress={() => handleBasePress(bases.second)}
+          disabled={!bases.second}
+        >
           <View style={[styles.base, bases.second && styles.baseOccupied]} />
           {bases.second && (
             <View style={styles.runnerTag}>
               <Text style={styles.runnerName}>{getRunnerName(bases.second)}</Text>
             </View>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* 3rd Base (Left) */}
-        <View style={[styles.baseContainer, styles.posThird]}>
+        <TouchableOpacity 
+          style={[styles.baseContainer, styles.posThird]}
+          onPress={() => handleBasePress(bases.third)}
+          disabled={!bases.third}
+        >
           <View style={[styles.base, bases.third && styles.baseOccupied]} />
           {bases.third && (
             <View style={[styles.runnerTag, styles.tagLeft]}>
               <Text style={styles.runnerName}>{getRunnerName(bases.third)}</Text>
             </View>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* 1st Base (Right) */}
-        <View style={[styles.baseContainer, styles.posFirst]}>
+        <TouchableOpacity 
+          style={[styles.baseContainer, styles.posFirst]}
+          onPress={() => handleBasePress(bases.first)}
+          disabled={!bases.first}
+        >
           <View style={[styles.base, bases.first && styles.baseOccupied]} />
           {bases.first && (
             <View style={[styles.runnerTag, styles.tagRight]}>
               <Text style={styles.runnerName}>{getRunnerName(bases.first)}</Text>
             </View>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* Home Plate (Bottom) */}
-        <View style={[styles.baseContainer, styles.posHome]}>
+        <View style={[styles.baseContainer, styles.posHome]} pointerEvents="none">
           <View style={styles.homePlateContainer}>
             <View style={styles.homePlateTop} />
             <View style={styles.homePlateBottom} />
@@ -82,8 +130,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
-    height: 240,
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+    height: 360,
     zIndex: 1,
   },
   fieldArea: {
@@ -106,16 +155,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   infieldGrass: {
-    width: INFIELD_SIDE - 24,
-    height: INFIELD_SIDE - 24,
+    width: INFIELD_SIDE - 28,
+    height: INFIELD_SIDE - 28,
     backgroundColor: COLORS.fieldGreen,
     borderRadius: 2,
   },
   mound: {
     position: 'absolute',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: COLORS.dirt,
     alignItems: 'center',
     justifyContent: 'center',
@@ -124,7 +173,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0.1)',
   },
   rubber: {
-    width: 6,
+    width: 8,
     height: 2,
     backgroundColor: 'white',
     opacity: 0.8,
@@ -157,13 +206,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   homePlateBottom: {
-    width: BASE_SIZE * 0.707, // Side of square to match BASE_SIZE width when rotated 45deg
+    width: BASE_SIZE * 0.707, 
     height: BASE_SIZE * 0.707,
     backgroundColor: 'white',
     transform: [{ rotate: '45deg' }],
-    marginTop: -BASE_SIZE * 0.35, // Pull up to overlap
+    marginTop: -BASE_SIZE * 0.35, 
   },
-  // Precise Positioning
+  
+  // Card Slots
+  cardSlot: {
+    position: 'absolute',
+    width: SLOT_WIDTH,
+    height: SLOT_HEIGHT,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderStyle: 'dashed',
+    zIndex: 5, 
+  },
+  slotSecond: {
+    top: CENTER - CORNER_DIST - BASE_SIZE - SLOT_HEIGHT + 10,
+    left: CENTER - (SLOT_WIDTH / 2),
+  },
+  slotFirst: {
+    top: CENTER - (SLOT_HEIGHT / 2),
+    right: CENTER - CORNER_DIST - BASE_SIZE - SLOT_WIDTH + 10,
+  },
+  slotThird: {
+    top: CENTER - (SLOT_HEIGHT / 2),
+    left: CENTER - CORNER_DIST - BASE_SIZE - SLOT_WIDTH + 10,
+  },
+
+  // Base Positioning
   posSecond: {
     top: CENTER - CORNER_DIST - (BASE_SIZE / 2),
     left: CENTER - (BASE_SIZE / 2),
@@ -183,20 +258,20 @@ const styles = StyleSheet.create({
   
   runnerTag: {
     position: 'absolute',
-    top: -20,
+    top: -22,
     backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 3,
-    minWidth: 35,
+    minWidth: 38,
     alignItems: 'center',
   },
   tagLeft: {
-    left: -35,
+    left: -38,
     top: 0,
   },
   tagRight: {
-    right: -35,
+    right: -38,
     top: 0,
   },
   runnerName: {

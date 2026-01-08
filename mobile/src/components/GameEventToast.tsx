@@ -7,7 +7,8 @@ import Animated, {
   withDelay, 
   withTiming, 
   useSharedValue, 
-  runOnJS 
+  runOnJS,
+  Easing
 } from 'react-native-reanimated';
 import { COLORS, FONT_SIZES, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
@@ -24,37 +25,58 @@ export const GameEventToast: React.FC<GameEventToastProps> = ({
   onAnimationComplete,
   type = 'neutral',
 }) => {
-  const translateY = useSharedValue(-100);
+  // Start slightly lower for a "rise" effect or just center pop
+  const translateY = useSharedValue(20);
   const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.9);
 
   useEffect(() => {
     if (isVisible) {
-      translateY.value = withSequence(
-        withSpring(20, { damping: 12 }), // Drop down
-        withDelay(2000, withTiming(-100, { duration: 300 }, (finished) => {
+      // RESET
+      translateY.value = 20;
+      opacity.value = 0;
+      scale.value = 0.8;
+
+      // ENTER - Tight and Fast
+      // Parallel-ish execution via state updates
+      translateY.value = withSpring(0, { 
+        damping: 15, 
+        stiffness: 400, 
+        mass: 0.5 
+      });
+
+      scale.value = withSpring(1, { 
+        damping: 15, 
+        stiffness: 400, 
+        mass: 0.5 
+      });
+
+      opacity.value = withSequence(
+        withTiming(1, { duration: 100 }), // Fast fade in
+        withDelay(1000, withTiming(0, { duration: 150 }, (finished) => {
           if (finished && onAnimationComplete) {
             runOnJS(onAnimationComplete)();
           }
         }))
       );
-      opacity.value = withSequence(
-        withTiming(1, { duration: 300 }),
-        withDelay(2000, withTiming(0, { duration: 300 }))
-      );
     }
   }, [isVisible, message]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [
+      { translateY: translateY.value },
+      { scale: scale.value }
+    ],
     opacity: opacity.value,
   }));
 
   const getBackgroundColor = () => {
+    // 95% opacity
     switch (type) {
-      case 'positive': return COLORS.success;
-      case 'negative': return COLORS.error;
-      case 'score': return COLORS.textGold;
-      default: return COLORS.surface;
+      case 'positive': return COLORS.success + 'b0';
+      case 'negative': return COLORS.error + 'b0';
+      case 'score': return COLORS.textGold + 'b0';
+      default: return '#333333b0';
     }
   };
 
@@ -86,23 +108,27 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    zIndex: 999, // Ensure it sits on top of everything
-    top: 100, // Position it below the turn banner
+    justifyContent: 'center', // Vertically centered
+    zIndex: 999,
+    elevation: 100,
   },
   container: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: BORDER_RADIUS.lg,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: BORDER_RADIUS.xl,
     ...SHADOWS.large,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
-    minWidth: 200,
+    minWidth: 240,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
   text: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '900',
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 1,

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { GameEngine } from '../engine/GameEngine';
 import { GameState } from '../models/Game';
-import { ChartResult } from '../models/Card';
+import { PlayerCard } from '../models/Card';
 import { Scoreboard } from '../components/Scoreboard';
 import { BaseballDiamond } from '../components/BaseballDiamond';
 import { DiceRoller } from '../components/DiceRoller';
@@ -14,10 +15,22 @@ import { GameEventToast } from '../components/GameEventToast';
 import { SAMPLE_TEAMS } from '../utils/sampleData';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Layout Constants
+const HEADER_HEIGHT = 100; // Scoreboard + Last Play
+const BOTTOM_HEIGHT = 180; // Matchup Section approx height
+const SAFE_MARGIN = 100;
+const DIAMOND_TARGET_HEIGHT = 360;
+
+// Dynamic Scale Calculationr
+const AVAILABLE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT - BOTTOM_HEIGHT - SAFE_MARGIN;
+const DIAMOND_SCALE = Math.min(1, Math.max(0.6, AVAILABLE_HEIGHT / DIAMOND_TARGET_HEIGHT));
+
 export const GameScreen: React.FC = () => {
   const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [showPlayerCard, setShowPlayerCard] = useState<'pitcher' | 'batter' | null>(null);
+  const [selectedCard, setSelectedCard] = useState<PlayerCard | null>(null);
   const [lastPlayMessage, setLastPlayMessage] = useState<string>('');
   const [showGameOver, setShowGameOver] = useState(false);
   
@@ -135,9 +148,11 @@ export const GameScreen: React.FC = () => {
     : gameState.homeTeam.name;
 
   const fatigueInfo = gameEngine.getPitcherFatigueInfo();
+  
+  const showAdvantage = gameState.currentPhase === 'SWING';
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <GameEventToast 
         message={toastMessage}
         isVisible={showToast}
@@ -145,7 +160,8 @@ export const GameScreen: React.FC = () => {
         onAnimationComplete={() => setShowToast(false)}
       />
 
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+      {/* Top Section: Scoreboard + Last Play */}
+      <View style={styles.topSection}>
         <Scoreboard
           inning={gameState.inning}
           isTopOfInning={gameState.isTopOfInning}
@@ -155,17 +171,50 @@ export const GameScreen: React.FC = () => {
           homeTeamName={gameState.homeTeam.name}
           awayTeamName={gameState.awayTeam.name}
         />
+        
+        <View style={styles.lastPlayContainer}>
+          <Text style={styles.lastPlayLabel}>LAST PLAY:</Text>
+          <Text style={styles.lastPlayText}>
+            {lastPlayMessage || 'Game Start'}
+          </Text>
+        </View>
+      </View>
 
-        <BaseballDiamond bases={gameState.bases} />
+      {/* Middle Section: Field + Dice (Scaled Responsively) */}
+      <View style={styles.middleSection}>
+        <BaseballDiamond 
+          bases={gameState.bases} 
+          onBaseClick={(card) => setSelectedCard(card)}
+          scale={DIAMOND_SCALE}
+        />
+        
+        <View style={styles.diceContainer}>
+          <DiceRoller 
+            onRoll={handleDiceRoll} 
+            disabled={gameState.isGameOver}
+          />
+        </View>
+      </View>
 
+      {/* Bottom Section: Matchup */}
+      <View style={styles.bottomSection}>
         <View style={styles.matchupSection}>
-
+          <View style={styles.phaseSection}>
+            <Text style={styles.phaseTitle}>
+              {gameState.currentPhase === 'PITCH' ? 'PITCH PHASE' : 'SWING PHASE'}
+            </Text>
+            <Text style={styles.phaseHint}>
+              {gameState.currentPhase === 'PITCH'
+                ? `${pitchingTeamName} - Roll for Advantage`
+                : `${gameState.currentAdvantage === 'PITCHER' ? pitchingTeamName : battingTeamName} - Roll on Chart`}
+            </Text>
+          </View>
           
           <View style={styles.matchupRow}>
-            <TouchableOpacity onPress={() => setShowPlayerCard(showPlayerCard === 'pitcher' ? null : 'pitcher')}>
+            <TouchableOpacity onPress={() => setSelectedCard(currentPitcher)}>
               <ShowdownCard 
                 card={currentPitcher}
-                hasAdvantage={gameState.currentAdvantage === 'PITCHER'}
+                hasAdvantage={showAdvantage && gameState.currentAdvantage === 'PITCHER'}
                 fatiguedControl={fatigueInfo.currentControl}
                 compact
               />
@@ -175,38 +224,23 @@ export const GameScreen: React.FC = () => {
                <Text style={styles.vs}>VS</Text>
             </View>
             
-            <TouchableOpacity onPress={() => setShowPlayerCard(showPlayerCard === 'batter' ? null : 'batter')}>
+            <TouchableOpacity onPress={() => setSelectedCard(currentBatter)}>
               <ShowdownCard 
                 card={currentBatter}
-                hasAdvantage={gameState.currentAdvantage === 'BATTER'}
+                hasAdvantage={showAdvantage && gameState.currentAdvantage === 'BATTER'}
                 compact
               />
             </TouchableOpacity>
           </View>
         </View>
+      </View>
 
-        {showPlayerCard && (
-          <PlayerCardView 
-            card={showPlayerCard === 'pitcher' ? currentPitcher : currentBatter} onClose={() => setShowPlayerCard(null)}
-          />
-        )}
-
-
-
-        <DiceRoller 
-          onRoll={handleDiceRoll} 
-          disabled={gameState.isGameOver}
+      {selectedCard && (
+        <PlayerCardView 
+          card={selectedCard} 
+          onClose={() => setSelectedCard(null)}
         />
-
-        {lastPlayMessage !== '' && (
-          <View style={styles.lastPlayContainer}>
-            <Text style={styles.lastPlayLabel}>LAST PLAY:</Text>
-            <Text style={styles.lastPlayText}>{lastPlayMessage}</Text>
-          </View>
-        )}
-
-        <View style={styles.spacer} />
-      </ScrollView>
+      )}
 
       {showPassDevice && (
         <PassDevicePrompt
@@ -227,7 +261,7 @@ export const GameScreen: React.FC = () => {
           onExit={handleExit}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -235,12 +269,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,
@@ -252,23 +280,74 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     color: COLORS.textSecondary,
   },
+  
+  // Layout Sections
+  topSection: {
+    zIndex: 10,
+    backgroundColor: COLORS.background,
+  },
+  middleSection: {
+    flex: 1,
+    justifyContent: 'center', 
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden', 
+  },
+  bottomSection: {
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+    backgroundColor: COLORS.background,
+    paddingBottom: SPACING.xs,
+  },
+
+  // Components
+  lastPlayContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  lastPlayLabel: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.textMuted,
+    marginRight: 8,
+  },
+  lastPlayText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  diceContainer: {
+    marginTop: -20,
+    marginBottom: 10,
+    zIndex: 20, 
+  },
+  
   matchupSection: {
     backgroundColor: COLORS.surface,
-    padding: SPACING.md,
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
+    padding: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderTopWidth: 1,
     borderColor: '#444',
   },
-  matchupTitle: {
+  phaseSection: {
+    marginBottom: SPACING.xs,
+    alignItems: 'center',
+  },
+  phaseTitle: {
     fontSize: FONT_SIZES.md,
     fontWeight: 'bold',
     color: COLORS.textGold,
-    marginBottom: SPACING.md,
+    marginBottom: 2,
+    letterSpacing: 1,
+  },
+  phaseHint: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
   },
   matchupRow: {
     flexDirection: 'row',
@@ -283,46 +362,9 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   vs: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.md,
     fontWeight: 'bold',
     color: COLORS.textMuted,
     fontStyle: 'italic',
-  },
-  phaseSection: {
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
-  },
-  phaseTitle: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
-    color: COLORS.textGold,
-    marginBottom: 4,
-    letterSpacing: 2,
-  },
-  phaseHint: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  lastPlayContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    marginTop: SPACING.sm,
-  },
-  lastPlayLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.textMuted,
-    marginRight: 8,
-  },
-  lastPlayText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
-  },
-  spacer: {
-    height: 40,
   },
 });

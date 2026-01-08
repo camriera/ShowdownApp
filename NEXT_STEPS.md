@@ -181,7 +181,10 @@ export async function searchCards(query: SearchQuery): Promise<PlayerCard[]> {
 
 ### Medium Priority - Enhanced Features
 
-#### 6. Build Roster Builder with Drag-and-Drop
+#### 6. UI/UX Enhancements
+- [ ] **Revisit fixed layout for small screens** - The current fixed layout in `GameScreen.tsx` uses responsive scaling but may still feel cramped on devices like iPhone SE. Consider alternative layouts or a scrollable "Field View".
+
+#### 7. Build Roster Builder with Drag-and-Drop
 **Estimated effort:** 6-8 hours
 
 **Tasks:**
