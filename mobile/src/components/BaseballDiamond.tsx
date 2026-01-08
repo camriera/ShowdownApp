@@ -1,59 +1,76 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { BaseRunners } from '../models/Game';
+import { COLORS, SHADOWS } from '../constants/theme';
 
 interface BaseballDiamondProps {
   bases: BaseRunners;
 }
 
+// Precise Geometry Constants
+const FIELD_SIZE = 220;
+const INFIELD_SIDE = 124; // Side length of the square
+const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2); // ~87.7px from center
+const BASE_SIZE = 14;
+const CENTER = FIELD_SIZE / 2;
+
 export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases }) => {
+  const getRunnerName = (runner: { name: string } | null) => {
+    if (!runner) return '';
+    const parts = runner.name.split(' ');
+    return parts[parts.length - 1].toUpperCase();
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.diamond}>
-        <View style={styles.secondBase}>
-          <View style={[styles.base, bases.second && styles.baseOccupied]}>
-            <Text style={styles.baseLabel}>2nd</Text>
-            {bases.second && (
-              <Text style={styles.playerName} numberOfLines={1}>
-                {bases.second.name.split(' ').pop()}
-              </Text>
-            )}
-          </View>
-        </View>
+      <View style={styles.fieldArea}>
         
-        <View style={styles.middleRow}>
-          <View style={styles.thirdBase}>
-            <View style={[styles.base, bases.third && styles.baseOccupied]}>
-              <Text style={styles.baseLabel}>3rd</Text>
-              {bases.third && (
-                <Text style={styles.playerName} numberOfLines={1}>
-                  {bases.third.name.split(' ').pop()}
-                </Text>
-              )}
-            </View>
-          </View>
-          
-          <View style={styles.pitchersMound}>
-            <View style={styles.mound}>
-              <Text style={styles.moundLabel}>P</Text>
-            </View>
-          </View>
-          
-          <View style={styles.firstBase}>
-            <View style={[styles.base, bases.first && styles.baseOccupied]}>
-              <Text style={styles.baseLabel}>1st</Text>
-              {bases.first && (
-                <Text style={styles.playerName} numberOfLines={1}>
-                  {bases.first.name.split(' ').pop()}
-                </Text>
-              )}
-            </View>
-          </View>
+        {/* Infield Dirt */}
+        <View style={styles.infieldDirt}>
+           <View style={styles.infieldGrass} />
         </View>
-        
-        <View style={styles.homePlate}>
-          <View style={styles.home}>
-            <Text style={styles.homeLabel}>HOME</Text>
+
+        {/* Pitcher's Mound */}
+        <View style={styles.mound}>
+           <View style={styles.rubber} />
+        </View>
+
+        {/* Bases */}
+        {/* 2nd Base (Top) */}
+        <View style={[styles.baseContainer, styles.posSecond]}>
+          <View style={[styles.base, bases.second && styles.baseOccupied]} />
+          {bases.second && (
+            <View style={styles.runnerTag}>
+              <Text style={styles.runnerName}>{getRunnerName(bases.second)}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* 3rd Base (Left) */}
+        <View style={[styles.baseContainer, styles.posThird]}>
+          <View style={[styles.base, bases.third && styles.baseOccupied]} />
+          {bases.third && (
+            <View style={[styles.runnerTag, styles.tagLeft]}>
+              <Text style={styles.runnerName}>{getRunnerName(bases.third)}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* 1st Base (Right) */}
+        <View style={[styles.baseContainer, styles.posFirst]}>
+          <View style={[styles.base, bases.first && styles.baseOccupied]} />
+          {bases.first && (
+            <View style={[styles.runnerTag, styles.tagRight]}>
+              <Text style={styles.runnerName}>{getRunnerName(bases.first)}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Home Plate (Bottom) */}
+        <View style={[styles.baseContainer, styles.posHome]}>
+          <View style={styles.homePlateContainer}>
+            <View style={styles.homePlateTop} />
+            <View style={styles.homePlateBottom} />
           </View>
         </View>
       </View>
@@ -65,111 +82,126 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    marginVertical: 10,
+    height: 240,
+    zIndex: 1,
   },
-  diamond: {
-    width: 280,
-    height: 280,
+  fieldArea: {
+    width: FIELD_SIZE,
+    height: FIELD_SIZE,
     position: 'relative',
-  },
-  secondBase: {
-    position: 'absolute',
-    top: 0,
-    left: '50%',
-    transform: [{ translateX: -40 }],
-  },
-  middleRow: {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    transform: [{ translateY: -40 }],
-  },
-  thirdBase: {
-    marginLeft: 0,
-  },
-  firstBase: {
-    marginRight: 0,
-  },
-  pitchersMound: {
-    position: 'absolute',
-    left: '50%',
-    transform: [{ translateX: -25 }],
-  },
-  homePlate: {
-    position: 'absolute',
-    bottom: 0,
-    left: '50%',
-    transform: [{ translateX: -40 }],
-  },
-  base: {
-    width: 80,
-    height: 80,
-    backgroundColor: '#f5f5dc',
-    transform: [{ rotate: '45deg' }],
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#8b7355',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  baseOccupied: {
-    backgroundColor: '#FFD700',
-    borderColor: '#DAA520',
+  infieldDirt: {
+    position: 'absolute',
+    width: INFIELD_SIDE,
+    height: INFIELD_SIDE,
+    backgroundColor: COLORS.dirt,
+    transform: [{ rotate: '45deg' }],
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.small,
+    zIndex: 1,
   },
-  baseLabel: {
-    transform: [{ rotate: '-45deg' }],
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  playerName: {
-    transform: [{ rotate: '-45deg' }],
-    fontSize: 10,
-    color: '#333',
-    marginTop: 4,
-    maxWidth: 50,
+  infieldGrass: {
+    width: INFIELD_SIDE - 24,
+    height: INFIELD_SIDE - 24,
+    backgroundColor: COLORS.fieldGreen,
+    borderRadius: 2,
   },
   mound: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#8b7355',
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.dirt,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#654321',
+    zIndex: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
   },
-  moundLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#f5f5dc',
+  rubber: {
+    width: 6,
+    height: 2,
+    backgroundColor: 'white',
+    opacity: 0.8,
   },
-  home: {
-    width: 80,
-    height: 80,
-    backgroundColor: '#FFFFFF',
+  baseContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  base: {
+    width: BASE_SIZE,
+    height: BASE_SIZE,
+    backgroundColor: 'white',
     transform: [{ rotate: '45deg' }],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#000',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  homeLabel: {
-    transform: [{ rotate: '-45deg' }],
-    fontSize: 12,
+  baseOccupied: {
+    backgroundColor: COLORS.textGold,
+    borderColor: '#FFF',
+    borderWidth: 1.5,
+  },
+  homePlateContainer: {
+    width: BASE_SIZE,
+    height: BASE_SIZE,
+    alignItems: 'center',
+  },
+  homePlateTop: {
+    width: BASE_SIZE,
+    height: BASE_SIZE * 0.6,
+    backgroundColor: 'white',
+  },
+  homePlateBottom: {
+    width: BASE_SIZE * 0.707, // Side of square to match BASE_SIZE width when rotated 45deg
+    height: BASE_SIZE * 0.707,
+    backgroundColor: 'white',
+    transform: [{ rotate: '45deg' }],
+    marginTop: -BASE_SIZE * 0.35, // Pull up to overlap
+  },
+  // Precise Positioning
+  posSecond: {
+    top: CENTER - CORNER_DIST - (BASE_SIZE / 2),
+    left: CENTER - (BASE_SIZE / 2),
+  },
+  posFirst: {
+    right: CENTER - CORNER_DIST - (BASE_SIZE / 2),
+    top: CENTER - (BASE_SIZE / 2),
+  },
+  posThird: {
+    left: CENTER - CORNER_DIST - (BASE_SIZE / 2),
+    top: CENTER - (BASE_SIZE / 2),
+  },
+  posHome: {
+    bottom: CENTER - CORNER_DIST - (BASE_SIZE / 2),
+    left: CENTER - (BASE_SIZE / 2),
+  },
+  
+  runnerTag: {
+    position: 'absolute',
+    top: -20,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+    minWidth: 35,
+    alignItems: 'center',
+  },
+  tagLeft: {
+    left: -35,
+    top: 0,
+  },
+  tagRight: {
+    right: -35,
+    top: 0,
+  },
+  runnerName: {
+    color: 'white',
+    fontSize: 9,
     fontWeight: 'bold',
-    color: '#000',
   },
 });

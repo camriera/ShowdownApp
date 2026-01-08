@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface ScoreboardProps {
   inning: number;
@@ -26,63 +26,49 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.teamsRow}>
-        <View style={[styles.teamColumn, awayIsBatting && styles.battingTeamColumn]}>
-          {awayIsBatting && (
-            <View style={styles.atBatBadge}>
-              <Text style={styles.atBatText}>AT BAT</Text>
-            </View>
-          )}
-          {!awayIsBatting && (
-            <View style={styles.pitchingBadge}>
-              <Text style={styles.pitchingText}>FIELD</Text>
-            </View>
-          )}
-          <Text style={styles.teamName}>{awayTeamName}</Text>
-          <Text style={[styles.score, awayIsBatting && styles.activeScore]}>
-            {awayScore}
-          </Text>
+      {/* Away Team Section */}
+      <View style={[styles.teamContainer, awayIsBatting && styles.activeTeamContainer]}>
+        <View style={styles.teamInfo}>
+          <Text style={styles.teamName} numberOfLines={1}>{awayTeamName}</Text>
+          {awayIsBatting && <Text style={styles.battingIndicator}>BAT</Text>}
+        </View>
+        <Text style={[styles.score, awayIsBatting && styles.activeScore]}>
+          {awayScore}
+        </Text>
+      </View>
+
+      {/* Center Info: Inning & Outs */}
+      <View style={styles.centerInfo}>
+        <View style={styles.inningBox}>
+          <Text style={styles.inningArrow}>{isTopOfInning ? '▲' : '▼'}</Text>
+          <Text style={styles.inningNumber}>{inning}</Text>
         </View>
         
-        <View style={styles.inningColumn}>
-          <Text style={styles.inningLabel}>INNING</Text>
-          <Text style={styles.inningValue}>{inning}</Text>
-          <Text style={styles.halfInning}>
-            {isTopOfInning ? '▲ TOP' : '▼ BOT'}
-          </Text>
-        </View>
-        
-        <View style={[styles.teamColumn, homeIsBatting && styles.battingTeamColumn]}>
-          {homeIsBatting && (
-            <View style={styles.atBatBadge}>
-              <Text style={styles.atBatText}>AT BAT</Text>
-            </View>
-          )}
-          {!homeIsBatting && (
-            <View style={styles.pitchingBadge}>
-              <Text style={styles.pitchingText}>FIELD</Text>
-            </View>
-          )}
-          <Text style={styles.teamName}>{homeTeamName}</Text>
-          <Text style={[styles.score, homeIsBatting && styles.activeScore]}>
-            {homeScore}
-          </Text>
+        <View style={styles.outsContainer}>
+          <Text style={styles.outsLabel}>OUTS</Text>
+          <View style={styles.outsDots}>
+            {[0, 1, 2].map((i) => (
+              <View
+                key={i}
+                style={[
+                  styles.outDot,
+                  i < outs && styles.outDotFilled,
+                ]}
+              />
+            ))}
+          </View>
         </View>
       </View>
-      
-      <View style={styles.outsRow}>
-        <Text style={styles.outsLabel}>OUTS</Text>
-        <View style={styles.outsDots}>
-          {[0, 1, 2].map((i) => (
-            <View
-              key={i}
-              style={[
-                styles.outDot,
-                i < outs && styles.outDotFilled,
-              ]}
-            />
-          ))}
+
+      {/* Home Team Section */}
+      <View style={[styles.teamContainer, homeIsBatting && styles.activeTeamContainer]}>
+        <View style={[styles.teamInfo, { alignItems: 'flex-end' }]}>
+          <Text style={styles.teamName} numberOfLines={1}>{homeTeamName}</Text>
+          {homeIsBatting && <Text style={styles.battingIndicator}>BAT</Text>}
         </View>
+        <Text style={[styles.score, homeIsBatting && styles.activeScore]}>
+          {homeScore}
+        </Text>
       </View>
     </View>
   );
@@ -90,123 +76,100 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.fieldGreen,
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    margin: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  teamsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    padding: SPACING.sm,
+    borderBottomWidth: 4,
+    borderBottomColor: COLORS.fieldGreen,
+    height: 80, // Constrained height
+    ...SHADOWS.medium,
   },
-  teamColumn: {
+  teamContainer: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.xs,
-  },
-  battingTeamColumn: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.sm,
+    height: '100%',
   },
-  inningColumn: {
+  activeTeamContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.textGold,
+  },
+  teamInfo: {
     flex: 1,
-    alignItems: 'center',
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    paddingVertical: SPACING.xs,
-  },
-  atBatBadge: {
-    backgroundColor: COLORS.batting,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.sm,
-    marginBottom: SPACING.xs,
-  },
-  atBatText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-    color: COLORS.background,
-    letterSpacing: 1,
-  },
-  pitchingBadge: {
-    backgroundColor: COLORS.pitching,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.sm,
-    marginBottom: SPACING.xs,
-  },
-  pitchingText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    letterSpacing: 1,
+    justifyContent: 'center',
   },
   teamName: {
     fontSize: FONT_SIZES.md,
+    fontWeight: 'bold',
     color: COLORS.textPrimary,
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  battingIndicator: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.success,
+    marginTop: 2,
   },
   score: {
-    fontSize: FONT_SIZES.display,
+    fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.textSecondary,
+    marginLeft: SPACING.sm,
+    fontVariant: ['tabular-nums'],
   },
   activeScore: {
     color: COLORS.textGold,
   },
-  inningLabel: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textPrimary,
-    opacity: 0.7,
-    letterSpacing: 1,
-    marginBottom: 2,
+  centerInfo: {
+    width: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    height: '80%',
   },
-  inningValue: {
-    fontSize: FONT_SIZES.title,
+  inningBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  inningArrow: {
+    fontSize: 14,
+    color: COLORS.textGold,
+    marginRight: 4,
+  },
+  inningNumber: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginBottom: 2,
   },
-  halfInning: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textGold,
-    fontWeight: '600',
-  },
-  outsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  outsContainer: {
     alignItems: 'center',
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
   outsLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
-    marginRight: SPACING.sm,
+    fontSize: 8,
+    color: COLORS.textSecondary,
+    fontWeight: 'bold',
+    marginBottom: 2,
     letterSpacing: 1,
   },
   outsDots: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    gap: 4,
   },
   outDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: COLORS.textPrimary,
-    backgroundColor: 'transparent',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#444',
   },
   outDotFilled: {
     backgroundColor: COLORS.error,

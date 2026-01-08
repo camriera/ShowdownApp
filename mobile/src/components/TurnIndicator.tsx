@@ -1,63 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
-
-interface TurnIndicatorProps {
-  currentTeam: 'home' | 'away';
-  teamName: string;
-  isBatting: boolean;
-}
-
-export const TurnIndicator: React.FC<TurnIndicatorProps> = ({
-  currentTeam,
-  teamName,
-  isBatting,
-}) => {
-  const teamColor = currentTeam === 'home' ? COLORS.homeTeam : COLORS.awayTeam;
-  const actionText = isBatting ? 'AT BAT' : 'PITCHING';
-  const actionColor = isBatting ? COLORS.batting : COLORS.pitching;
-
-  return (
-    <View style={[styles.container, { borderLeftColor: teamColor }]}>
-      <View style={styles.teamSection}>
-        <Text style={[styles.teamLabel, { color: teamColor }]}>
-          {currentTeam.toUpperCase()} TEAM
-        </Text>
-        <Text style={styles.teamName}>{teamName}</Text>
-      </View>
-      
-      <View style={[styles.actionBadge, { backgroundColor: actionColor }]}>
-        <Text style={styles.actionText}>{actionText}</Text>
-      </View>
-    </View>
-  );
-};
-
-interface TurnBannerProps {
-  battingTeam: 'home' | 'away';
-  battingTeamName: string;
-  pitchingTeamName: string;
-  message?: string;
-}
-
-export const TurnBanner: React.FC<TurnBannerProps> = ({
-  battingTeam,
-  battingTeamName,
-  message,
-}) => {
-  const teamColor = battingTeam === 'home' ? COLORS.homeTeam : COLORS.awayTeam;
-
-  return (
-    <View style={[styles.banner, { backgroundColor: teamColor }]}>
-      <Text style={styles.bannerText}>
-        {battingTeamName.toUpperCase()} AT BAT
-      </Text>
-      {message && (
-        <Text style={styles.bannerSubtext}>{message}</Text>
-      )}
-    </View>
-  );
-};
 
 interface PassDevicePromptProps {
   nextTeam: 'home' | 'away';
@@ -68,81 +11,30 @@ interface PassDevicePromptProps {
 export const PassDevicePrompt: React.FC<PassDevicePromptProps> = ({
   nextTeam,
   nextTeamName,
+  onReady,
 }) => {
   const teamColor = nextTeam === 'home' ? COLORS.homeTeam : COLORS.awayTeam;
 
   return (
     <View style={styles.passDeviceOverlay}>
-      <View style={styles.passDeviceCard}>
-        <Text style={styles.passDeviceTitle}>PASS THE DEVICE</Text>
-        <View style={[styles.passDeviceTeamBadge, { backgroundColor: teamColor }]}>
-          <Text style={styles.passDeviceTeamText}>
-            {nextTeamName.toUpperCase()}
+      <TouchableOpacity onPress={onReady} activeOpacity={0.9}>
+        <View style={styles.passDeviceCard}>
+          <Text style={styles.passDeviceTitle}>PASS THE DEVICE</Text>
+          <View style={[styles.passDeviceTeamBadge, { backgroundColor: teamColor }]}>
+            <Text style={styles.passDeviceTeamText}>
+              {nextTeamName.toUpperCase()}
+            </Text>
+          </View>
+          <Text style={styles.passDeviceSubtext}>
+            Tap when {nextTeamName} is ready
           </Text>
         </View>
-        <Text style={styles.passDeviceSubtext}>
-          Tap when {nextTeamName} is ready
-        </Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.surface,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderLeftWidth: 4,
-    marginHorizontal: SPACING.md,
-    marginVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  teamSection: {
-    flex: 1,
-  },
-  teamLabel: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
-    letterSpacing: 1,
-  },
-  teamName: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginTop: 2,
-  },
-  actionBadge: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  actionText: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    letterSpacing: 1,
-  },
-  banner: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    alignItems: 'center',
-  },
-  bannerText: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    letterSpacing: 2,
-  },
-  bannerSubtext: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
-    opacity: 0.9,
-    marginTop: 2,
-  },
   passDeviceOverlay: {
     position: 'absolute',
     top: 0,
