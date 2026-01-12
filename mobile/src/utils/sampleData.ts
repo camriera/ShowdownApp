@@ -1,12 +1,36 @@
 import { HitterCard, PitcherCard } from '../models/Card';
 
+export const SHITTY_PITCHER: PitcherCard = {
+  id: 'pitcher_2',
+  name: 'Shitty Pitcher',
+  year: '2021',
+  team: 'Home',
+  playerType: 'Pitcher',
+  command: 2,
+  outs: 13,
+  ip: 4,
+  points: 220,
+  hand: 'R',
+  chart: [
+    { range: [1, 4], result: 'PU' },
+    { range: [5, 7], result: 'SO' },
+    { range: [8, 11], result: 'GB' },
+    { range: [12, 13], result: 'FB' },
+    { range: [14, 14], result: 'BB' },
+    { range: [15, 16], result: '1B' },
+    { range: [17, 17], result: '2B' },
+    { range: [18, 18], result: '3B' },
+    { range: [20, 20], result: 'HR' },
+  ],
+};
+
 export const SAMPLE_PITCHER: PitcherCard = {
   id: 'pitcher_1',
   name: 'Ace Pitcher',
   year: '2021',
   team: 'Home',
   playerType: 'Pitcher',
-  command: 4,
+  command: 3,
   outs: 16,
   ip: 6,
   points: 350,
@@ -111,9 +135,7 @@ export const SAMPLE_TEAMS = {
   away: {
     name: 'Away Team',
     pitcher: {
-      ...SAMPLE_PITCHER,
-      id: 'pitcher_2',
-      name: 'Away Ace',
+      ...SHITTY_PITCHER,
       team: 'Away',
     },
     lineup: [

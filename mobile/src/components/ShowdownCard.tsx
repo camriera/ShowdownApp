@@ -18,7 +18,8 @@ interface ShowdownCardProps {
   onPress?: () => void;
   compact?: boolean;
   style?: ViewStyle;
-  fatiguedControl?: number; // New prop for fatigue
+  fatiguedControl?: number;
+  showThumbnail?: boolean;
 }
 
 export const ShowdownCard: React.FC<ShowdownCardProps> = ({
@@ -28,6 +29,7 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   compact = false,
   style,
   fatiguedControl,
+  showThumbnail = true,
 }) => {
   const glowOpacity = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -69,12 +71,60 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   const mainStatLabel = isPitcher ? 'Control' : 'On-Base';
   let mainStatValue = card.command;
   const isFatigued = isPitcher && fatiguedControl !== undefined && fatiguedControl < mainStatValue;
-  
+
   // If fatigued, we display the fatigued value.
   const displayValue = isFatigued ? fatiguedControl : mainStatValue;
 
+  // Compact mode: show card image with name and control stat overlaid
+  if (compact) {
+    return (
+      <Animated.View style={[styles.container, styles.compactContainer, animatedStyle, style]}>
+        {/* Animated Glow Background */}
+        <Animated.View style={[styles.glow, glowStyle]} />
+
+        {/* Card Image as background */}
+        {card.imageUrl && (
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={styles.compactImage}
+            resizeMode="cover"
+            onError={() => {}} // Silently fall through to stats view on error
+          />
+        )}
+
+        {/* Header overlay with player name */}
+        <View style={styles.compactHeaderOverlay}>
+          <Text style={styles.compactPlayerName} numberOfLines={1}>{card.name}</Text>
+        </View>
+
+        {/* Center content overlay */}
+        <View style={styles.compactContentOverlay}>
+          <Text style={styles.compactStatLabel}>{mainStatLabel}</Text>
+          <Text style={[
+            styles.compactStatValue,
+            isFatigued && styles.fatiguedValue
+          ]}>
+            {displayValue}
+          </Text>
+          {isFatigued && (
+            <View style={styles.fatigueBadge}>
+              <Text style={styles.fatigueText}>TIRED</Text>
+            </View>
+          )}
+        </View>
+
+        {hasAdvantage && (
+          <View style={styles.advantageBanner}>
+            <Text style={styles.advantageText}>ADV</Text>
+          </View>
+        )}
+      </Animated.View>
+    );
+  }
+
+  // Full card view
   return (
-    <Animated.View style={[styles.container, compact && styles.compactContainer, animatedStyle, style]}>
+    <Animated.View style={[styles.container, animatedStyle, style]}>
       {/* Animated Glow Background */}
       <Animated.View style={[styles.glow, glowStyle]} />
 
@@ -92,35 +142,33 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>{mainStatLabel}</Text>
           <View style={styles.statValueContainer}>
-             <Text style={[
-               styles.statValue, 
-               isFatigued && styles.fatiguedValue
-             ]}>
-               {displayValue}
-             </Text>
-             {isFatigued && (
-               <View style={styles.fatigueBadge}>
-                 <Text style={styles.fatigueText}>TIRED</Text>
-               </View>
-             )}
+            <Text style={[
+              styles.statValue,
+              isFatigued && styles.fatiguedValue
+            ]}>
+              {displayValue}
+            </Text>
+            {isFatigued && (
+              <View style={styles.fatigueBadge}>
+                <Text style={styles.fatigueText}>TIRED</Text>
+              </View>
+            )}
           </View>
           {isFatigued && (
-             <Text style={styles.originalStat}>
-               (Base: {mainStatValue})
-             </Text>
+            <Text style={styles.originalStat}>
+              (Base: {mainStatValue})
+            </Text>
           )}
         </View>
-        
-        {!compact && (
-          <View style={styles.secondaryStats}>
-             {isPitcher ? (
-               <Text style={styles.secondaryStatText}>IP: {card.ip}</Text>
-             ) : (
-               <Text style={styles.secondaryStatText}>SPD: {card.speed}</Text>
-             )}
-             <Text style={styles.positionText}>{card.position}</Text>
-          </View>
-        )}
+
+        <View style={styles.secondaryStats}>
+          {isPitcher ? (
+            <Text style={styles.secondaryStatText}>IP: {card.ip}</Text>
+          ) : (
+            <Text style={styles.secondaryStatText}>SPD: {card.speed}</Text>
+          )}
+          <Text style={styles.positionText}>{card.position}</Text>
+        </View>
       </View>
 
       {hasAdvantage && (
@@ -145,6 +193,51 @@ const styles = StyleSheet.create({
   compactContainer: {
     width: 130,
     height: 160,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  compactImage: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+  },
+  compactHeaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    zIndex: 2,
+  },
+  compactPlayerName: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 10,
+    textAlign: 'center',
+  },
+  compactContentOverlay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  compactStatLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 9,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowRadius: 2,
+  },
+  compactStatValue: {
+    color: COLORS.textPrimary,
+    fontSize: 40,
+    fontWeight: 'bold',
+    includeFontPadding: false,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowRadius: 3,
   },
   glow: {
     ...StyleSheet.absoluteFillObject,
@@ -190,6 +283,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+  },
+  thumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: COLORS.cardBorder,
   },
   statBox: {
     alignItems: 'center',

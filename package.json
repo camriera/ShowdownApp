@@ -14,24 +14,39 @@
   ],
   "scripts": {
     "dev:mobile": "cd mobile && npm start",
-    "dev:functions": "netlify dev",
-    "dev": "concurrently \"npm:dev:mobile\" \"npm:dev:functions\"",
+    "dev:mobile:tunnel": "cd mobile && npm run start:tunnel",
+    "dev:web": "cd mobile && npm run web",
+    "dev:functions": "netlify dev --offline --no-open --port 9000",
+    "dev:functions-simple": "netlify functions:serve --port 9999",
+    "dev": "concurrently -n \"mobile,functions\" -c \"cyan,yellow\" \"npm:dev:mobile\" \"npm:dev:functions\"",
+    "dev:web:functions": "concurrently -n \"web,functions\" -c \"cyan,yellow\" \"npm:dev:web\" \"npm:dev:functions\"",
+    "dev:tunnel": "concurrently -n \"mobile,functions,ngrok\" -c \"cyan,yellow,magenta\" \"npm:dev:mobile:tunnel\" \"netlify dev --offline --no-open --port 9000\" \"npm:tunnel:functions\"",
+    "tunnel:functions": "node scripts/tunnel-functions.js",
     "build": "cd mobile && npm run build",
+    "build:functions": "netlify build",
     "test": "cd mobile && npm test",
+    "test:functions": "echo 'No function tests yet'",
     "lint": "cd mobile && npm run lint",
     "deploy": "netlify deploy --prod",
-    "db:migrate": "psql $DATABASE_URL < database/schema.sql"
+    "db:migrate": "psql $DATABASE_URL < database/schema.sql",
+    "db:populate": "node scripts/populateCards.js",
+    "db:test": "node -e \"require('dotenv').config(); const {Pool} = require('pg'); const pool = new Pool({connectionString: process.env.DATABASE_URL}); pool.query('SELECT NOW()').then(r => console.log('✅ Database connected:', r.rows[0])).catch(e => console.error('❌ Database error:', e.message)).finally(() => pool.end());\"",
+    "verify": "node scripts/verify-setup.js",
+    "setup": "npm install && cd mobile && npm install && cd .. && npm run verify"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.4.1",
+    "@netlify/functions": "^2.8.2",
+    "@ngrok/ngrok": "^1.7.0",
     "@types/node": "^20.10.5",
-    "@types/pg": "^8.10.9",
+    "@types/pg": "^8.16.0",
     "concurrently": "^8.2.2",
-    "netlify-cli": "^17.10.1",
-    "typescript": "^5.3.3"
+    "netlify-cli": "^17.38.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "pg": "^8.11.3"
+    "cloudinary": "^2.8.0",
+    "dotenv": "^16.6.1",
+    "pg": "^8.16.3"
   },
   "engines": {
     "node": ">=18.0.0",

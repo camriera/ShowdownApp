@@ -1,5 +1,5 @@
 import { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
-import { getPool } from '../utils/db';
+import { getPool } from './db';
 
 interface CardGenerationRequest {
   name: string;

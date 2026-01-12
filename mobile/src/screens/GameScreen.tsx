@@ -13,6 +13,7 @@ import { PassDevicePrompt } from '../components/TurnIndicator';
 import { ShowdownCard } from '../components/ShowdownCard';
 import { GameEventToast } from '../components/GameEventToast';
 import { SAMPLE_TEAMS } from '../utils/sampleData';
+import { loadDefaultTeams, Team } from '../utils/teamLoader';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -33,21 +34,41 @@ export const GameScreen: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<PlayerCard | null>(null);
   const [lastPlayMessage, setLastPlayMessage] = useState<string>('');
   const [showGameOver, setShowGameOver] = useState(false);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   
-  // Toast State
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastType, setToastType] = useState<'positive' | 'negative' | 'neutral' | 'score'>('neutral');
 
-  // Hot Seat State
   const [showPassDevice, setShowPassDevice] = useState(false);
   const prevIsTopOfInning = useRef<boolean | null>(null);
 
   useEffect(() => {
-    const engine = new GameEngine(SAMPLE_TEAMS.home, SAMPLE_TEAMS.away);
-    setGameEngine(engine);
-    setGameState(engine.getState());
-    prevIsTopOfInning.current = true; // Initial state is top of inning
+    async function initializeGame() {
+      try {
+        setIsLoadingTeams(true);
+        setLoadError(null);
+        
+        const teams = await loadDefaultTeams();
+        const engine = new GameEngine(teams.home, teams.away);
+        setGameEngine(engine);
+        setGameState(engine.getState());
+        prevIsTopOfInning.current = true;
+      } catch (error) {
+        console.error('Failed to load teams, falling back to sample data:', error);
+        setLoadError('Could not load real teams from database. Using sample data.');
+        
+        const engine = new GameEngine(SAMPLE_TEAMS.home, SAMPLE_TEAMS.away);
+        setGameEngine(engine);
+        setGameState(engine.getState());
+        prevIsTopOfInning.current = true;
+      } finally {
+        setIsLoadingTeams(false);
+      }
+    }
+
+    initializeGame();
   }, []);
 
   useEffect(() => {
@@ -123,10 +144,15 @@ export const GameScreen: React.FC = () => {
     setShowGameOver(false);
   };
 
-  if (!gameState || !gameEngine) {
+  if (isLoadingTeams || !gameState || !gameEngine) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading game...</Text>
+        <Text style={styles.loadingText}>
+          {isLoadingTeams ? 'Loading teams...' : 'Initializing game...'}
+        </Text>
+        {loadError && (
+          <Text style={styles.errorText}>{loadError}</Text>
+        )}
       </View>
     );
   }
@@ -280,6 +306,13 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: FONT_SIZES.lg,
     color: COLORS.textSecondary,
+  },
+  errorText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.error,
+    marginTop: SPACING.md,
+    textAlign: 'center',
+    paddingHorizontal: SPACING.lg,
   },
   
   // Layout Sections

@@ -26,6 +26,7 @@ const DISMISS_THRESHOLD = 100;
 const FLIP_THRESHOLD = 80;
 
 export const PlayerCardView: React.FC<PlayerCardViewProps> = ({ card, onClose }) => {
+  const [imageLoadFailed, setImageLoadFailed] = React.useState(false);
   const rotation = useSharedValue(0);
   const baseRotation = useSharedValue(0); // Stores the snapped angle (0 or 180)
   const translateY = useSharedValue(0);
@@ -33,7 +34,8 @@ export const PlayerCardView: React.FC<PlayerCardViewProps> = ({ card, onClose })
 
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 300 });
-  }, []);
+    setImageLoadFailed(false); // Reset image error when card changes
+  }, [card]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -172,43 +174,62 @@ export const PlayerCardView: React.FC<PlayerCardViewProps> = ({ card, onClose })
   const isPitcher = card.playerType === 'Pitcher';
 
   // Content Components
-  const CardFront = () => (
-    <View style={[styles.cardFace, styles.frontFace]}>
-      <View style={styles.foilHeader}>
-        <Text style={styles.teamName}>{card.team.toUpperCase()}</Text>
-        <Text style={styles.yearBadge}>{card.year}</Text>
-      </View>
-      <View style={styles.imageContainer}>
-        <Image 
-          source={require('../../assets/blankplayer-2004-dark.png')} 
-          style={styles.playerImage} 
-          resizeMode="cover"
-        />
-        <View style={styles.nameOverlay}>
-           <Text style={styles.playerName}>{card.name}</Text>
-           <Text style={styles.playerPosition}>{card.position}</Text>
+  const CardFront = () => {
+    // If we have a card image and it hasn't failed to load, show just the image
+    if (card.imageUrl && !imageLoadFailed) {
+      return (
+        <View style={[styles.cardFace, styles.frontFace]}>
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={styles.fullCardImage}
+            resizeMode="cover"
+            onError={() => setImageLoadFailed(true)}
+          />
+          <Text style={styles.flipHint}>Swipe L/R to Flip • Swipe Up to Close</Text>
         </View>
-      </View>
-      <View style={styles.statBadgeContainer}>
-        <View style={styles.statBadge}>
-          <Text style={styles.statLabel}>{isPitcher ? 'CONTROL' : 'ON-BASE'}</Text>
-          <Text style={styles.statValue}>{card.command}</Text>
+      );
+    }
+
+    // Fallback to stats view if no image
+    return (
+      <View style={[styles.cardFace, styles.frontFace]}>
+        <View style={styles.foilHeader}>
+          <Text style={styles.teamName}>{card.team.toUpperCase()}</Text>
+          <Text style={styles.yearBadge}>{card.year}</Text>
         </View>
-        <View style={styles.pointsContainer}>
-           <Text style={styles.pointsValue}>{card.points} PTS</Text>
+        <View style={styles.imageContainer}>
+          <Image
+            source={require('../../assets/blankplayer-2004-dark.png')}
+            style={styles.playerImage}
+            resizeMode="cover"
+          />
+          <View style={styles.nameOverlay}>
+             <Text style={styles.playerName}>{card.name}</Text>
+             <Text style={styles.playerPosition}>
+               {isPitcher ? `P • ${card.hand}` : `${Object.keys(card.positions || {})[0] || 'POS'}`}
+             </Text>
+          </View>
         </View>
+        <View style={styles.statBadgeContainer}>
+          <View style={styles.statBadge}>
+            <Text style={styles.statLabel}>{isPitcher ? 'CONTROL' : 'ON-BASE'}</Text>
+            <Text style={styles.statValue}>{card.command}</Text>
+          </View>
+          <View style={styles.pointsContainer}>
+             <Text style={styles.pointsValue}>{card.points} PTS</Text>
+          </View>
+        </View>
+        <Text style={styles.flipHint}>Swipe L/R to Flip • Swipe Up to Close</Text>
       </View>
-      <Text style={styles.flipHint}>Swipe L/R to Flip • Swipe Up to Close</Text>
-    </View>
-  );
+    );
+  };
 
   const CardBack = () => (
     <View style={[styles.cardFace, styles.backFace]}>
       <View style={styles.backHeader}>
         <Text style={styles.backTitle}>{card.name}</Text>
         <View style={styles.secondaryStatsRow}>
-           <Text style={styles.secStat}>{isPitcher ? `IP: ${card.ip}` : `SPD: ${card.speed}`}</Text>
-           <Text style={styles.secStat}>{card.position}</Text>
+           <Text style={styles.secStat}>{card.team.toUpperCase()} • {card.year}</Text>
         </View>
       </View>
       <View style={styles.chartContainer}>
@@ -222,6 +243,16 @@ export const PlayerCardView: React.FC<PlayerCardViewProps> = ({ card, onClose })
                <Text style={[styles.resultText, getResultStyle(entry.result)]}>{entry.result}</Text>
              </View>
           ))}
+        </View>
+      </View>
+      <View style={styles.backFooter}>
+        <View style={styles.backFooterStat}>
+          <Text style={styles.backFooterLabel}>{isPitcher ? 'CONTROL' : 'ON-BASE'}</Text>
+          <Text style={styles.backFooterValue}>{card.command}</Text>
+        </View>
+        <View style={styles.backFooterStat}>
+          <Text style={styles.backFooterLabel}>POINTS</Text>
+          <Text style={styles.backFooterValue}>{card.points}</Text>
         </View>
       </View>
       <Text style={styles.flipHint}>Swipe L/R to Flip • Swipe Up to Close</Text>
@@ -390,4 +421,13 @@ const styles = StyleSheet.create({
   resWalk: { color: '#1E90FF' },
   resOut: { color: '#DC143C' },
   flipHint: { textAlign: 'center', color: '#999', fontSize: 12, fontStyle: 'italic', marginTop: 8, position: 'absolute', bottom: 4, width: '100%' },
+
+  // Front full card image
+  fullCardImage: { width: '100%', height: '100%' },
+
+  // Back footer
+  backFooter: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 12, borderTopWidth: 2, borderTopColor: '#333', marginTop: 12 },
+  backFooterStat: { alignItems: 'center' },
+  backFooterLabel: { fontSize: 11, fontWeight: '600', color: '#666', letterSpacing: 0.5, marginBottom: 4 },
+  backFooterValue: { fontSize: 24, fontWeight: 'bold', color: '#111' },
 });

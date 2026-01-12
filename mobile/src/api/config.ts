@@ -2,8 +2,8 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8888/.
 
 export const API_ENDPOINTS = {
   CARDS: {
-    GENERATE: `${API_BASE_URL}/cards/generate`,
-    SEARCH: `${API_BASE_URL}/cards/search`,
+    GENERATE: `${API_BASE_URL}/cards-generate`,
+    SEARCH: `${API_BASE_URL}/cards-search`,
   },
   GAMES: {
     CREATE: `${API_BASE_URL}/games/create`,
