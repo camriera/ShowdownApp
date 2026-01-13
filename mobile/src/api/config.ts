@@ -1,5 +1,7 @@
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8888/.netlify/functions';
 
+console.log(`🔧 API_BASE_URL configured as: ${API_BASE_URL}`);
+
 export const API_ENDPOINTS = {
   CARDS: {
     GENERATE: `${API_BASE_URL}/cards-generate`,

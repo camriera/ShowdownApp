@@ -51,6 +51,24 @@ export const GameScreen: React.FC = () => {
         setLoadError(null);
         
         const teams = await loadDefaultTeams();
+
+        // Log lineups at game start
+        console.log('🎮 GAME INITIALIZED');
+        console.log('\n📍 HOME TEAM:', teams.home.name);
+        console.log('  Pitcher:', teams.home.pitcher.name, `(${teams.home.pitcher.year}) Control:`, teams.home.pitcher.command);
+        console.log('  Lineup:');
+        teams.home.lineup.forEach((card, i) => {
+          console.log(`    ${i}: ${card.name} (${card.year}) - OnBase: ${card.command}, Speed: ${card.speed}`);
+        });
+
+        console.log('\n📍 AWAY TEAM:', teams.away.name);
+        console.log('  Pitcher:', teams.away.pitcher.name, `(${teams.away.pitcher.year}) Control:`, teams.away.pitcher.command);
+        console.log('  Lineup:');
+        teams.away.lineup.forEach((card, i) => {
+          console.log(`    ${i}: ${card.name} (${card.year}) - OnBase: ${card.command}, Speed: ${card.speed}`);
+        });
+        console.log('\n');
+
         const engine = new GameEngine(teams.home, teams.away);
         setGameEngine(engine);
         setGameState(engine.getState());
@@ -91,41 +109,67 @@ export const GameScreen: React.FC = () => {
 
     try {
       if (gameState.currentPhase === 'PITCH') {
+        const pitcher = currentPitcher;
+        const batter = currentBatter;
+
+        console.log('\n🎲 PITCH PHASE ROLL');
+        console.log(`  Pitcher: ${pitcher?.name} (Control: ${pitcher?.command})`);
+        console.log(`  Batter: ${batter?.name} (OnBase: ${batter?.command})`);
+        console.log(`  📍 Roll: ${roll}`);
+        console.log(`  ✓ Pitcher passes on: ${pitcher?.command || 0} + (roll ${roll})`);
+        console.log(`  ✓ Batter passes on: ${batter?.command || 0} + (roll ${roll})`);
+
         const { pitchResult, advantage } = gameEngine.executePitchPhase(roll);
         setGameState(gameEngine.getState());
-        
+
+        console.log(`  🏆 Result: ${advantage} ADVANTAGE`);
+
         const message = `Roll: ${roll} -> ${advantage} ADVANTAGE!`;
         setLastPlayMessage(message);
         triggerToast(
           `${advantage} ADVANTAGE!`,
           advantage === 'PITCHER' ? 'negative' : 'positive'
         );
-        
+
       } else if (gameState.currentPhase === 'SWING') {
+        const pitcher = currentPitcher;
+        const batter = currentBatter;
+
+        console.log('\n🎲 SWING PHASE ROLL');
+        console.log(`  Pitcher: ${pitcher?.name} (Control: ${pitcher?.command})`);
+        console.log(`  Batter: ${batter?.name} (OnBase: ${batter?.command})`);
+        console.log(`  📍 Roll: ${roll}`);
+        console.log(`  ✓ Looking up chart on: ${roll}`);
+
         const { chartResult } = gameEngine.executeSwingPhase(roll);
         const result = gameEngine.resolveResult(chartResult);
         setGameState(gameEngine.getState());
-        
+
+        console.log(`  📊 Chart Result: ${chartResult}`);
+        console.log(`  📈 Outcome: ${result.description}`);
+        if (result.runsScored > 0) {
+          console.log(`  🏃 Runners score: ${result.runsScored}`);
+        }
+
         let message = `${chartResult}: ${result.description}`;
         let type: 'positive' | 'negative' | 'neutral' | 'score' = 'neutral';
-        
+
         if (result.runsScored > 0) {
           message += ` (${result.runsScored} RUNS!)`;
           type = 'score';
-        } else if (result.outs > 0) {
-          type = 'negative';
         } else {
           type = 'positive';
         }
-        
+
         setLastPlayMessage(message);
         triggerToast(chartResult, type);
-        
+
         if (gameEngine.getState().isGameOver) {
           setShowGameOver(true);
         }
       }
     } catch (error) {
+      console.error('❌ Dice roll error:', error);
       triggerToast(error instanceof Error ? error.message : 'Unknown error', 'negative');
     }
   };
@@ -157,13 +201,32 @@ export const GameScreen: React.FC = () => {
     );
   }
 
-  const currentPitcher = gameState.isTopOfInning 
-    ? gameState.homeTeam.pitcher 
+  const currentPitcher = gameState.isTopOfInning
+    ? gameState.homeTeam.pitcher
     : gameState.awayTeam.pitcher;
-    
+
   const currentBatter = gameState.isTopOfInning
     ? gameState.awayTeam.lineup[gameState.currentBatterIndex % gameState.awayTeam.lineup.length]
     : gameState.homeTeam.lineup[gameState.currentBatterIndex % gameState.homeTeam.lineup.length];
+
+  // Log when currentBatter is undefined
+  if (!currentBatter) {
+    const team = gameState.isTopOfInning ? gameState.awayTeam : gameState.homeTeam;
+    const index = gameState.currentBatterIndex % team.lineup.length;
+    console.warn(
+      `⚠️  currentBatter is undefined!`,
+      {
+        currentBatterIndex: gameState.currentBatterIndex,
+        lineupLength: team.lineup.length,
+        calculatedIndex: index,
+        lineup: team.lineup.map((c, i) => ({ index: i, name: c?.name || 'MISSING' })),
+      }
+    );
+  }
+
+  if (!currentPitcher) {
+    console.warn(`⚠️  currentPitcher is undefined!`);
+  }
 
   const pitchingTeamName = gameState.isTopOfInning 
     ? gameState.homeTeam.name 

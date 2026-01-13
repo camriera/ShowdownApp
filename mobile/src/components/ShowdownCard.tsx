@@ -31,6 +31,15 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   fatiguedControl,
   showThumbnail = true,
 }) => {
+  // Handle undefined/null card
+  if (!card) {
+    return (
+      <View style={[styles.container, styles.compactContainer, style]}>
+        <Text style={styles.errorText}>Card data unavailable</Text>
+      </View>
+    );
+  }
+
   const glowOpacity = useSharedValue(0);
   const scale = useSharedValue(1);
 
@@ -365,5 +374,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 10,
     letterSpacing: 2,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontWeight: 'bold',
+    fontSize: 12,
+    textAlign: 'center',
+    padding: 8,
   },
 });
