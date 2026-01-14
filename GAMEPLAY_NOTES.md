@@ -27,7 +27,7 @@
 - Future enhancements:
   - Player speed affecting steal attempts
   - Advance on errors
-  - Force plays
+  - Force plays/
 
 ## Testing Scenarios
 
