@@ -11,15 +11,14 @@ interface BaseballDiamondProps {
 }
 
 // Precise Geometry Constants
-const FIELD_SIZE = 260; 
-const INFIELD_SIDE = 146;
+const FIELD_SIZE = 200;
+const INFIELD_SIDE = 112;
 const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2);
-const BASE_SIZE = 16;
+const BASE_SIZE = 12;
 const CENTER = FIELD_SIZE / 2;
 
-// Card Slot Constants (20% larger)
-const SLOT_WIDTH = 36;
-const SLOT_HEIGHT = 50;
+const SLOT_WIDTH = 90;
+const SLOT_HEIGHT = 125;
 
 export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseClick, scale = 1 }) => {
   const getRunnerName = (runner: { name: string } | null) => {
@@ -50,7 +49,7 @@ export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseC
   };
 
   return (
-    <View style={[styles.container, { transform: [{ scale }], height: 360 * scale }]}>
+    <View style={[styles.container, { transform: [{ scale }], height: 280 * scale }]}>
       <View style={styles.fieldArea}>
         
         {/* Card Slots - 2nd Base */}
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: SPACING.xl,
     paddingHorizontal: SPACING.lg,
-    height: 360,
+    height: 280,
     zIndex: 1,
   },
   fieldArea: {
@@ -197,9 +196,9 @@ const styles = StyleSheet.create({
   },
   mound: {
     position: 'absolute',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: COLORS.dirt,
     alignItems: 'center',
     justifyContent: 'center',
@@ -208,7 +207,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0.1)',
   },
   rubber: {
-    width: 8,
+    width: 6,
     height: 2,
     backgroundColor: 'white',
     opacity: 0.8,
@@ -304,25 +303,25 @@ const styles = StyleSheet.create({
   
   runnerTag: {
     position: 'absolute',
-    top: -22,
+    top: -17,
     backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 3,
-    minWidth: 38,
+    minWidth: 29,
     alignItems: 'center',
   },
   tagLeft: {
-    left: -38,
+    left: -29,
     top: 0,
   },
   tagRight: {
-    right: -38,
+    right: -29,
     top: 0,
   },
   runnerName: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 7,
     fontWeight: 'bold',
   },
 });

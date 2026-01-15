@@ -176,9 +176,10 @@ export const GameScreen: React.FC = () => {
           message += ` (${result.runsScored} RUNS!)`;
           type = 'score';
         } else {
-          const isOut = ['SO', 'GB', 'FB'].includes(chartResult);
+          const isOut = ['SO', 'GB', 'FB', 'PU'].includes(chartResult);
           const isSafe = ['1B', '1B+', '2B', '3B', 'HR', 'BB'].includes(chartResult);
           
+          // We need this to be based on the "user" if it's the users advantage, but right now we are just simulated games on a single phone
           if (gameState.currentAdvantage === 'BATTER') {
             type = isOut ? 'batting-out' : isSafe ? 'batting-safe' : 'neutral';
           } else {
