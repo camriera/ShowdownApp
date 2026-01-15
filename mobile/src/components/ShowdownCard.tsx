@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { PlayerCard } from '../models/Card';
 import { COLORS, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { LAYOUT, moderateScale } from '../constants/layout';
 
 interface ShowdownCardProps {
   card: PlayerCard;
@@ -17,6 +18,7 @@ interface ShowdownCardProps {
   hasAdvantage?: boolean;
   onPress?: () => void;
   compact?: boolean;
+  mini?: boolean;
   headerOnly?: boolean;
   imageOnly?: boolean;
   style?: ViewStyle;
@@ -29,6 +31,7 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   isActive = false,
   hasAdvantage = false,
   compact = false,
+  mini = false,
   headerOnly = false,
   imageOnly = false,
   style,
@@ -87,6 +90,28 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
 
   // If fatigued, we display the fatigued value.
   const displayValue = isFatigued ? fatiguedControl : mainStatValue;
+
+  // Mini mode: tiny card for dugout lineup (45x60px)
+  if (mini) {
+    return (
+      <View style={[styles.miniContainer, style]}>
+        {card.imageUrl && (
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={styles.miniImage}
+            resizeMode="cover"
+            onError={() => {}}
+          />
+        )}
+        <View style={styles.miniOverlay}>
+          <Text style={styles.miniName} numberOfLines={1}>
+            {card.name.split(' ').pop()?.substring(0, 6)}
+          </Text>
+          <Text style={styles.miniStat}>{displayValue}</Text>
+        </View>
+      </View>
+    );
+  }
 
   // Image-only mode: just show the card image as background (for runners on base)
   if (imageOnly) {
@@ -257,6 +282,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+  },
+  miniContainer: {
+    width: LAYOUT.miniCardWidth,
+    height: LAYOUT.miniCardHeight,
+    backgroundColor: '#222',
+    borderRadius: moderateScale(4),
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  miniImage: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+  },
+  miniOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: moderateScale(2),
+    zIndex: 1,
+  },
+  miniName: {
+    color: '#FFF',
+    fontSize: moderateScale(7),
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  miniStat: {
+    color: COLORS.textGold,
+    fontSize: moderateScale(12),
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   compactImage: {
     ...StyleSheet.absoluteFillObject,

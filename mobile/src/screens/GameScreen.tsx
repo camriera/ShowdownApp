@@ -7,27 +7,15 @@ import { GameState } from '../models/Game';
 import { PlayerCard } from '../models/Card';
 import { Scoreboard } from '../components/Scoreboard';
 import { BaseballDiamond } from '../components/BaseballDiamond';
-import { DiceRoller } from '../components/DiceRoller';
 import { PlayerCardView } from '../components/PlayerCardView';
 import { GameOverOverlay } from '../components/GameOverOverlay';
 import { PassDevicePrompt } from '../components/TurnIndicator';
-import { ShowdownCard } from '../components/ShowdownCard';
 import { GameEventToast } from '../components/GameEventToast';
+import { MatchupPanel } from '../components/MatchupPanel';
+import { DugoutBar } from '../components/DugoutBar';
 import { SAMPLE_TEAMS } from '../utils/sampleData';
 import { loadDefaultTeams, Team } from '../utils/teamLoader';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Layout Constants
-const HEADER_HEIGHT = 100; // Scoreboard + Last Play
-const BOTTOM_HEIGHT = 180; // Matchup Section approx height
-const SAFE_MARGIN = 100;
-const DIAMOND_TARGET_HEIGHT = 360;
-
-// Dynamic Scale Calculationr
-const AVAILABLE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT - BOTTOM_HEIGHT - SAFE_MARGIN;
-const DIAMOND_SCALE = Math.min(1, Math.max(0.6, AVAILABLE_HEIGHT / DIAMOND_TARGET_HEIGHT));
 
 export const GameScreen: React.FC = () => {
   const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
@@ -263,8 +251,6 @@ export const GameScreen: React.FC = () => {
     : gameState.homeTeam.name;
 
   const fatigueInfo = gameEngine.getPitcherFatigueInfo();
-  
-  const showAdvantage = gameState.currentPhase === 'SWING';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -297,61 +283,32 @@ export const GameScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Middle Section: Field (Scaled Responsively) */}
       <View style={styles.middleSection}>
         <BaseballDiamond 
           bases={gameState.bases} 
           onBaseClick={(card) => setSelectedCard(card)}
-          scale={DIAMOND_SCALE}
         />
       </View>
 
-      {/* Bottom Section: Dice + Matchup */}
-      <View style={styles.bottomSection}>
-        <View style={styles.diceContainer}>
-          <DiceRoller 
-            onRoll={handleDiceRoll} 
-            disabled={gameState.isGameOver}
-            scale={Math.max(0.8, DIAMOND_SCALE)}
-          />
-        </View>
+      <MatchupPanel
+        pitcher={currentPitcher}
+        batter={currentBatter}
+        phase={gameState.currentPhase === 'PITCH' ? 'PITCH' : 'SWING'}
+        advantage={gameState.currentAdvantage}
+        onDiceRoll={handleDiceRoll}
+        disabled={gameState.isGameOver}
+        pitchingTeamName={pitchingTeamName}
+        battingTeamName={battingTeamName}
+        fatiguedControl={fatigueInfo.currentControl}
+        onCardPress={(card) => setSelectedCard(card)}
+      />
 
-        <View style={styles.matchupSection}>
-          <View style={styles.phaseSection}>
-            <Text style={styles.phaseTitle}>
-              {gameState.currentPhase === 'PITCH' ? 'PITCH PHASE' : 'SWING PHASE'}
-            </Text>
-            <Text style={styles.phaseHint}>
-              {gameState.currentPhase === 'PITCH'
-                ? `${pitchingTeamName} - Roll for Advantage`
-                : `${gameState.currentAdvantage === 'PITCHER' ? pitchingTeamName : battingTeamName} - Roll on Chart`}
-            </Text>
-          </View>
-          
-          <View style={styles.matchupRow}>
-            <TouchableOpacity onPress={() => setSelectedCard(currentPitcher)}>
-              <ShowdownCard 
-                card={currentPitcher}
-                hasAdvantage={showAdvantage && gameState.currentAdvantage === 'PITCHER'}
-                fatiguedControl={fatigueInfo.currentControl}
-                compact
-              />
-            </TouchableOpacity>
-            
-            <View style={styles.vsContainer}>
-               <Text style={styles.vs}>VS</Text>
-            </View>
-            
-            <TouchableOpacity onPress={() => setSelectedCard(currentBatter)}>
-              <ShowdownCard 
-                card={currentBatter}
-                hasAdvantage={showAdvantage && gameState.currentAdvantage === 'BATTER'}
-                compact
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+      <DugoutBar
+        mode="batting"
+        lineup={gameState.isTopOfInning ? gameState.awayTeam.lineup : gameState.homeTeam.lineup}
+        currentBatterIndex={gameState.currentBatterIndex}
+        onCardPress={(card) => setSelectedCard(card)}
+      />
 
       {selectedCard && (
         <PlayerCardView 
@@ -417,12 +374,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-  bottomSection: {
-    backgroundColor: COLORS.background,
-    paddingBottom: SPACING.xs,
-  },
-
-  // Components
   lastPlayContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -441,52 +392,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     fontWeight: '500',
-  },
-  diceContainer: {
-    alignItems: 'center',
-    marginBottom: SPACING.sm, // Spacing between dice and matchup
-    zIndex: 20, 
-  },
-  
-  matchupSection: {
-    backgroundColor: COLORS.surface,
-    padding: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderTopWidth: 1,
-    borderColor: '#444',
-  },
-  phaseSection: {
-    marginBottom: SPACING.xs,
-    alignItems: 'center',
-  },
-  phaseTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: 'bold',
-    color: COLORS.textGold,
-    marginBottom: 2,
-    letterSpacing: 1,
-  },
-  phaseHint: {
-    fontSize: 10,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  matchupRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xs,
-  },
-  vsContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
-    opacity: 0.5,
-  },
-  vs: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: 'bold',
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
   },
 });

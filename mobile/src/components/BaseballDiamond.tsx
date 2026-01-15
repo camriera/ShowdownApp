@@ -3,24 +3,23 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BaseRunners, HitterCard } from '../models/Game';
 import { ShowdownCard } from './ShowdownCard';
 import { COLORS, SHADOWS, SPACING } from '../constants/theme';
+import { LAYOUT } from '../constants/layout';
 
 interface BaseballDiamondProps {
   bases: BaseRunners;
   onBaseClick?: (card: HitterCard) => void;
-  scale?: number;
 }
 
-// Precise Geometry Constants
-const FIELD_SIZE = 200;
-const INFIELD_SIDE = 112;
+const FIELD_SIZE = LAYOUT.fieldSize;
+const INFIELD_SIDE = LAYOUT.infieldSide;
 const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2);
-const BASE_SIZE = 12;
+const BASE_SIZE = LAYOUT.baseSize;
 const CENTER = FIELD_SIZE / 2;
 
-const SLOT_WIDTH = 90;
-const SLOT_HEIGHT = 125;
+const SLOT_WIDTH = LAYOUT.cardSlotWidth;
+const SLOT_HEIGHT = LAYOUT.cardSlotHeight;
 
-export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseClick, scale = 1 }) => {
+export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseClick }) => {
   const getRunnerName = (runner: { name: string } | null) => {
     if (!runner) return '';
     const parts = runner.name.split(' ').filter(p => p.length > 0);
@@ -49,7 +48,7 @@ export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseC
   };
 
   return (
-    <View style={[styles.container, { transform: [{ scale }], height: 280 * scale }]}>
+    <View style={styles.container}>
       <View style={styles.fieldArea}>
         
         {/* Card Slots - 2nd Base */}
@@ -163,10 +162,11 @@ export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseC
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.xl,
+    justifyContent: 'flex-start',
+    paddingTop: LAYOUT.cardSlotHeight + SPACING.md,
+    paddingBottom: SPACING.xl,
     paddingHorizontal: SPACING.lg,
-    height: 280,
+    height: LAYOUT.diamondContainerHeight,
     zIndex: 1,
   },
   fieldArea: {
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     left: CENTER - CORNER_DIST - BASE_SIZE - SLOT_WIDTH + 10,
   },
 
-  // Base Positioning
   posSecond: {
     top: CENTER - CORNER_DIST - (BASE_SIZE / 2),
     left: CENTER - (BASE_SIZE / 2),

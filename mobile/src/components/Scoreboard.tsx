@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { LAYOUT, moderateScale, verticalScale } from '../constants/layout';
 
 interface ScoreboardProps {
   inning: number;
@@ -79,10 +80,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.sm,
+    paddingHorizontal: moderateScale(6),
     borderBottomWidth: 3,
     borderBottomColor: COLORS.fieldGreen,
-    height: 60, // Reduced from 80
+    height: LAYOUT.scoreboardHeight,
     ...SHADOWS.medium,
   },
   teamContainer: {
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.sm,
+    paddingHorizontal: moderateScale(6),
     height: '100%',
   },
   activeTeamContainer: {
@@ -103,30 +104,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   teamName: {
-    fontSize: FONT_SIZES.sm, // Reduced from md
+    fontSize: moderateScale(11),
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   battingIndicator: {
-    fontSize: 8, // Reduced from 10
+    fontSize: moderateScale(7),
     fontWeight: '900',
     color: COLORS.success,
     marginTop: 1,
   },
   score: {
-    fontSize: 24, // Reduced from 32
+    fontSize: moderateScale(22),
     fontWeight: 'bold',
     color: COLORS.textSecondary,
-    marginLeft: SPACING.xs,
+    marginLeft: moderateScale(4),
     fontVariant: ['tabular-nums'],
   },
   activeScore: {
     color: COLORS.textGold,
   },
   centerInfo: {
-    width: 60, // Reduced from 80
+    width: moderateScale(52),
     alignItems: 'center',
     justifyContent: 'center',
     borderLeftWidth: 1,
@@ -140,12 +141,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   inningArrow: {
-    fontSize: 10, // Reduced from 14
+    fontSize: moderateScale(9),
     color: COLORS.textGold,
     marginRight: 2,
   },
   inningNumber: {
-    fontSize: 16, // Reduced from 20
+    fontSize: moderateScale(14),
     fontWeight: 'bold',
     color: COLORS.textPrimary,
   },
@@ -157,9 +158,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   outDot: {
-    width: 6, // Reduced from 8
-    height: 6,
-    borderRadius: 3,
+    width: moderateScale(5),
+    height: moderateScale(5),
+    borderRadius: moderateScale(2.5),
     backgroundColor: '#444',
   },
   outDotFilled: {

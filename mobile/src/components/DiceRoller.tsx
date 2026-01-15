@@ -13,17 +13,18 @@ import Animated, {
   cancelAnimation
 } from 'react-native-reanimated';
 import { COLORS, SHADOWS } from '../constants/theme';
+import { LAYOUT } from '../constants/layout';
 
 interface DiceRollerProps {
   onRoll: (value: number) => void;
   disabled?: boolean;
-  scale?: number;
+  compact?: boolean;
 }
 
-const D20_SIZE = 80;
+const D20_SIZE = LAYOUT.diceSize;
 const D20_COLOR = COLORS.primary;
 
-export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false, scale: propScale = 1 }) => {
+export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false, compact = false }) => {
   const [displayValue, setDisplayValue] = useState<string>('d20');
   const [isRolling, setIsRolling] = useState(false);
   
@@ -119,7 +120,7 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false
   });
 
   return (
-    <View style={[styles.container, { transform: [{ scale: propScale }] }]}>
+    <View style={compact ? styles.compactContainer : styles.container}>
       <TouchableOpacity
         onPress={handleRoll}
         disabled={disabled || isRolling}
@@ -127,21 +128,21 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({ onRoll, disabled = false
         style={[styles.touchable, disabled && styles.disabled]}
       >
         <Animated.View style={[styles.diceContainer, animatedStyle]}>
-          {/* Hexagon Construction using 3 Rectangles */}
           <View style={[styles.hexPart, styles.vertical]} />
           <View style={[styles.hexPart, styles.rotated60]} />
           <View style={[styles.hexPart, styles.rotatedNeg60]} />
           
-          {/* Inner Facet Lines (Simulating D20 faces) */}
           <View style={styles.innerTriangle} />
           
           <Text style={styles.diceText}>{displayValue}</Text>
         </Animated.View>
       </TouchableOpacity>
       
-      <Text style={styles.hint}>
-        {isRolling ? 'Rolling...' : 'Tap or shake to roll'}
-      </Text>
+      {!compact && (
+        <Text style={styles.hint}>
+          {isRolling ? 'Rolling...' : 'Tap or shake to roll'}
+        </Text>
+      )}
     </View>
   );
 };
@@ -158,6 +159,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    zIndex: 5,
+  },
+  compactContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
     zIndex: 5,
   },
   touchable: {
