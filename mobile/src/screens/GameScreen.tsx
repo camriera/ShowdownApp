@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FireworksEffect } from '../components/CelebrationEffects';
 import { GameEngine } from '../engine/GameEngine';
 import { GameState } from '../models/Game';
 import { PlayerCard } from '../models/Card';
@@ -39,10 +40,15 @@ export const GameScreen: React.FC = () => {
   
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [toastType, setToastType] = useState<'positive' | 'negative' | 'neutral' | 'score'>('neutral');
+  const [toastType, setToastType] = useState<'advantage' | 'batting-safe' | 'batting-out' | 'pitching-safe' | 'pitching-out' | 'score' | 'positive' | 'negative' | 'neutral'>('neutral');
 
   const [showPassDevice, setShowPassDevice] = useState(false);
+  const [showFireworks, setShowFireworks] = useState(false);
   const prevIsTopOfInning = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    console.log('🎆 showFireworks state changed:', showFireworks);
+  }, [showFireworks]);
 
   useEffect(() => {
     async function initializeGame() {
@@ -98,7 +104,10 @@ export const GameScreen: React.FC = () => {
     }
   }, [gameState]);
 
-  const triggerToast = (message: string, type: 'positive' | 'negative' | 'neutral' | 'score' = 'neutral') => {
+  const triggerToast = (
+    message: string, 
+    type: 'advantage' | 'batting-safe' | 'batting-out' | 'pitching-safe' | 'pitching-out' | 'score' | 'positive' | 'negative' | 'neutral' = 'neutral'
+  ) => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -127,8 +136,8 @@ export const GameScreen: React.FC = () => {
         const message = `Roll: ${roll} -> ${advantage} ADVANTAGE!`;
         setLastPlayMessage(message);
         triggerToast(
-          `${advantage} ADVANTAGE!`,
-          advantage === 'PITCHER' ? 'negative' : 'positive'
+          message,
+          'advantage'
         );
 
       } else if (gameState.currentPhase === 'SWING') {
@@ -152,17 +161,33 @@ export const GameScreen: React.FC = () => {
         }
 
         let message = `${chartResult}: ${result.description}`;
-        let type: 'positive' | 'negative' | 'neutral' | 'score' = 'neutral';
+        let type: 'advantage' | 'batting-safe' | 'batting-out' | 'pitching-safe' | 'pitching-out' | 'score' | 'positive' | 'negative' | 'neutral' = 'neutral';
+
+        if (chartResult === 'HR') {
+          console.log('🎆 HOME RUN! Triggering fireworks...');
+          setShowFireworks(true);
+          setTimeout(() => {
+            console.log('🎆 Hiding fireworks');
+            setShowFireworks(false);
+          }, 3000);
+        }
 
         if (result.runsScored > 0) {
           message += ` (${result.runsScored} RUNS!)`;
           type = 'score';
         } else {
-          type = 'positive';
+          const isOut = ['SO', 'GB', 'FB'].includes(chartResult);
+          const isSafe = ['1B', '1B+', '2B', '3B', 'HR', 'BB'].includes(chartResult);
+          
+          if (gameState.currentAdvantage === 'BATTER') {
+            type = isOut ? 'batting-out' : isSafe ? 'batting-safe' : 'neutral';
+          } else {
+            type = isOut ? 'pitching-out' : isSafe ? 'pitching-safe' : 'neutral';
+          }
         }
 
         setLastPlayMessage(message);
-        triggerToast(chartResult, type);
+        triggerToast(message, type);
 
         if (gameEngine.getState().isGameOver) {
           setShowGameOver(true);
@@ -242,6 +267,8 @@ export const GameScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <FireworksEffect show={showFireworks} />
+
       <GameEventToast 
         message={toastMessage}
         isVisible={showToast}

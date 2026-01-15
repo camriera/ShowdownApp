@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8888/.netlify/functions';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9000/api';
 
 console.log(`🔧 API_BASE_URL configured as: ${API_BASE_URL}`);
 

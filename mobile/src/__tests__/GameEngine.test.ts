@@ -151,13 +151,16 @@ describe('GameEngine', () => {
       expect(result.runsScored).toBe(0);
     });
 
-    it('should record ground out', () => {
+    it('should record ground out with no runners', () => {
       engine.executePitchPhase(15);
       engine.executeSwingPhase(8);
       const result = engine.resolveResult('GB');
       
       expect(result.isOut).toBe(true);
       expect(result.outsRecorded).toBe(1);
+      expect(result.newBaseState.first).toBeNull();
+      expect(result.newBaseState.second).toBeNull();
+      expect(result.newBaseState.third).toBeNull();
     });
 
     it('should increment outs in game state', () => {
@@ -167,6 +170,127 @@ describe('GameEngine', () => {
       
       const state = engine.getState();
       expect(state.outs).toBe(1);
+    });
+  });
+
+  describe('Result Phase - Ground Ball Force Outs', () => {
+    it('should take force out at 2nd with runner on 1st', () => {
+      const state = engine.getState();
+      const runnerOn1st = homeLineup[0];
+      state.bases.first = runnerOn1st;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(8);
+      const result = engine.resolveResult('GB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.outsRecorded).toBe(1);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBeNull();
+    });
+
+    it('should take force out at 3rd with runners on 1st and 2nd', () => {
+      const state = engine.getState();
+      const runnerOn1st = homeLineup[0];
+      const runnerOn2nd = homeLineup[1];
+      state.bases.first = runnerOn1st;
+      state.bases.second = runnerOn2nd;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(8);
+      const result = engine.resolveResult('GB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.outsRecorded).toBe(1);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBe(runnerOn1st);
+      expect(result.newBaseState.third).toBeNull();
+    });
+
+    it('should take force out at home with bases loaded', () => {
+      const state = engine.getState();
+      state.bases.first = homeLineup[0];
+      state.bases.second = homeLineup[1];
+      state.bases.third = homeLineup[2];
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(8);
+      const result = engine.resolveResult('GB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.outsRecorded).toBe(1);
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBeDefined();
+      expect(result.newBaseState.third).toBeDefined();
+    });
+  });
+
+  describe('Result Phase - Fly Balls and Sacrifice Flies', () => {
+    it('should record fly out with no runners', () => {
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(12);
+      const result = engine.resolveResult('FB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.outsRecorded).toBe(1);
+      expect(result.runsScored).toBe(0);
+      expect(result.description).toBe('Fly Out');
+    });
+
+    it('should score runner from 3rd on sacrifice fly with 0 outs', () => {
+      const state = engine.getState();
+      const runnerOn3rd = homeLineup[0];
+      state.bases.third = runnerOn3rd;
+      state.outs = 0;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(12);
+      const result = engine.resolveResult('FB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.outsRecorded).toBe(1);
+      expect(result.runsScored).toBe(1);
+      expect(result.newBaseState.third).toBeNull();
+      expect(result.description).toBe('Sacrifice Fly');
+    });
+
+    it('should score runner from 3rd on sacrifice fly with 1 out', () => {
+      const state = engine.getState();
+      const runnerOn3rd = homeLineup[0];
+      state.bases.third = runnerOn3rd;
+      state.outs = 1;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(12);
+      const result = engine.resolveResult('FB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.runsScored).toBe(1);
+      expect(result.newBaseState.third).toBeNull();
+      expect(result.description).toBe('Sacrifice Fly');
+    });
+
+    it('should NOT score runner from 3rd on fly ball with 2 outs', () => {
+      const runnerOn3rd = homeLineup[0];
+      
+      for (let i = 0; i < 2; i++) {
+        engine.executePitchPhase(15);
+        engine.executeSwingPhase(5);
+        engine.resolveResult('SO');
+      }
+      
+      const state = engine.getState();
+      state.bases.third = runnerOn3rd;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(12);
+      const result = engine.resolveResult('FB');
+      
+      expect(result.isOut).toBe(true);
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.third).toBe(runnerOn3rd);
+      expect(result.description).toBe('Fly Out');
     });
   });
 
@@ -216,7 +340,7 @@ describe('GameEngine', () => {
       expect(result.newBaseState.third).toBeNull();
     });
 
-    it('should handle walk with bases loaded', () => {
+    it('should handle walk with bases loaded - runner from 3rd scores', () => {
       const state = engine.getState();
       state.bases.first = homeLineup[0];
       state.bases.second = homeLineup[1];
@@ -230,6 +354,75 @@ describe('GameEngine', () => {
       expect(result.newBaseState.first).toBeDefined();
       expect(result.newBaseState.second).toBeDefined();
       expect(result.newBaseState.third).toBeDefined();
+    });
+
+    it('should handle walk with runners on 1st and 2nd - force advance to 3rd', () => {
+      const state = engine.getState();
+      const runnerOn1st = homeLineup[0];
+      const runnerOn2nd = homeLineup[1];
+      state.bases.first = runnerOn1st;
+      state.bases.second = runnerOn2nd;
+      state.bases.third = null;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(18);
+      const result = engine.resolveResult('BB');
+      
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBe(runnerOn1st);
+      expect(result.newBaseState.third).toBe(runnerOn2nd);
+    });
+
+    it('should handle walk with runner on 1st only - advance to 2nd', () => {
+      const state = engine.getState();
+      const runnerOn1st = homeLineup[0];
+      state.bases.first = runnerOn1st;
+      state.bases.second = null;
+      state.bases.third = null;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(18);
+      const result = engine.resolveResult('BB');
+      
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBe(runnerOn1st);
+      expect(result.newBaseState.third).toBeNull();
+    });
+
+    it('should handle walk with runner on 2nd only - stays at 2nd (not forced)', () => {
+      const state = engine.getState();
+      const runnerOn2nd = homeLineup[0];
+      state.bases.first = null;
+      state.bases.second = runnerOn2nd;
+      state.bases.third = null;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(18);
+      const result = engine.resolveResult('BB');
+      
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBe(runnerOn2nd);
+      expect(result.newBaseState.third).toBeNull();
+    });
+
+    it('should handle walk with runner on 3rd only - stays at 3rd (not forced)', () => {
+      const state = engine.getState();
+      const runnerOn3rd = homeLineup[0];
+      state.bases.first = null;
+      state.bases.second = null;
+      state.bases.third = runnerOn3rd;
+      
+      engine.executePitchPhase(15);
+      engine.executeSwingPhase(18);
+      const result = engine.resolveResult('BB');
+      
+      expect(result.runsScored).toBe(0);
+      expect(result.newBaseState.first).toBeDefined();
+      expect(result.newBaseState.second).toBeNull();
+      expect(result.newBaseState.third).toBe(runnerOn3rd);
     });
   });
 

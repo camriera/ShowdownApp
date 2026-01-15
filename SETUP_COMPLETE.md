@@ -25,7 +25,7 @@ Your Showdown App is now fully configured for local development with Netlify Fun
 ```bash
 npm run dev                 # Start both mobile + backend
 npm run dev:mobile          # Mobile app only (port 8081)
-npm run dev:functions       # Netlify backend only (port 8888)
+npm run dev:functions       # Netlify backend only (port 9000)
 npm run dev:functions-only  # Functions direct (port 9999)
 ```
 
@@ -65,7 +65,7 @@ npm run dev
 
 This starts:
 1. **Mobile App** on http://localhost:8081
-2. **Backend API** on http://localhost:8888
+2. **Backend API** on http://localhost:9000
 
 ### Test the Backend
 
@@ -76,7 +76,7 @@ npm run db:test
 
 **Generate a test card:**
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
@@ -99,14 +99,14 @@ npm run android  # Android
 Your backend functions are available at:
 
 ### Local Development
-- Generate Card: `http://localhost:8888/.netlify/functions/cards/generate` (POST)
-- Search Cards: `http://localhost:8888/.netlify/functions/cards/search` (GET)
+- Generate Card: `http://localhost:9000/api/cards-generate` (POST)
+- Search Cards: `http://localhost:9000/api/cards-search` (GET)
 
 ### Production (after deployment)
-- Generate Card: `https://your-site.netlify.app/api/cards/generate` (POST)
-- Search Cards: `https://your-site.netlify.app/api/cards/search` (GET)
+- Generate Card: `https://your-site.netlify.app/api/cards-generate` (POST)
+- Search Cards: `https://your-site.netlify.app/api/cards-search` (GET)
 
-Note: The `/api/*` prefix redirects to `/.netlify/functions/*` (configured in netlify.toml)
+Note: The `/api/*` prefix redirects to `/api/*` (configured in netlify.toml)
 
 ## 🎯 What Your Mobile App Can Now Do
 
@@ -188,11 +188,9 @@ mobile/src/
 ### Backend Structure
 ```
 netlify/functions/
-├── cards/
-│   ├── generate.ts    # Generate new cards
-│   └── search.ts      # Search cached cards
-└── utils/
-    └── db.ts          # PostgreSQL connection pool
+├── cards-generate.ts  # Generate new cards
+├── cards-search.ts    # Search cached cards
+└── db.ts              # PostgreSQL connection pool
 ```
 
 ## 🚨 Common Issues
@@ -200,7 +198,7 @@ netlify/functions/
 ### Mobile can't connect to backend
 **Fix:**
 1. Verify backend is running: `npm run dev:functions`
-2. Check `mobile/.env` has: `EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions`
+2. Check `mobile/.env` has: `EXPO_PUBLIC_API_URL=http://localhost:9000/api`
 3. Restart Expo: Press `r` or shake device → Reload
 
 ### Database connection timeout
@@ -212,7 +210,7 @@ netlify/functions/
 ### "Function not found" error
 **Fix:**
 1. Ensure Netlify Dev is running
-2. Check URL: `http://localhost:8888/.netlify/functions/cards/generate`
+2. Check URL: `http://localhost:9000/api/cards-generate`
 3. Verify `netlify.toml` has correct functions directory
 
 ### TypeScript errors in functions
@@ -232,7 +230,7 @@ netlify/functions/
 2. **Explore the code:**
    - Try generating a card in the mobile app
    - Look at `mobile/src/api/cardApi.ts` to see API calls
-   - Check `netlify/functions/cards/generate.ts` for backend logic
+   - Check `netlify/functions/cards-generate.ts` for backend logic
 
 3. **Make changes:**
    - Modify a component in `mobile/src/components/`

@@ -35,7 +35,7 @@ npm run dev:tunnel
 ```
 [ngrok] ✅ Tunnel established!
 [ngrok] 📡 Public URL: https://xxxx.ngrok-free.app
-[ngrok] 🔧 Functions: https://xxxx.ngrok-free.app/.netlify/functions
+[ngrok] 🔧 Functions: https://xxxx.ngrok-free.app/api
 [ngrok] 📝 Updated mobile/.env
 ```
 
@@ -54,7 +54,7 @@ npm run dev:tunnel
 
 ## Why?
 
-WSL2 networking is isolated. Your phone can't reach `localhost:8888` in WSL2. Tunnels make your local services publicly accessible.
+WSL2 networking is isolated. Your phone can't reach `localhost:9000` in WSL2. Tunnels make your local services publicly accessible.
 
 ## Full Details
 

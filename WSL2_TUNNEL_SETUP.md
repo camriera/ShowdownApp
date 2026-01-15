@@ -15,7 +15,7 @@ npm run dev:tunnel
 
 This starts:
 - 📱 Expo with `--tunnel` mode
-- 🔧 Netlify Functions on localhost:8888
+- 🔧 Netlify Functions on localhost:9000
 - 🌐 ngrok tunnel exposing functions publicly
 
 ### Option 2: Manual Control
@@ -65,7 +65,7 @@ npx expo login
 
 ### Without Tunnel (Local Only)
 ```
-Phone ❌ → WSL2 localhost:8888 (can't reach)
+Phone ❌ → WSL2 localhost:9000 (can't reach)
 Expo  ❌ → WSL2 localhost:8081 (can't reach from Windows)
 ```
 
@@ -73,9 +73,9 @@ Expo  ❌ → WSL2 localhost:8081 (can't reach from Windows)
 ```
 Phone ✅ → Expo Tunnel URL (exp://xxx.tunnelme.com)
        ↓
-       → https://xxxx-xx-xx-xxx-xxx.ngrok-free.app/.netlify/functions
+       → https://xxxx-xx-xx-xxx-xxx.ngrok-free.app/api
        ↓
-       → WSL2 localhost:8888 (Netlify Functions)
+       → WSL2 localhost:9000 (Netlify Functions)
 ```
 
 ## 📱 Using the App
@@ -88,10 +88,10 @@ Phone ✅ → Expo Tunnel URL (exp://xxx.tunnelme.com)
 2. **Wait for tunnels to establish** (takes 10-20 seconds):
    ```
    [mobile] › Metro waiting on exp://192.168.x.x:8081
-   [functions] ◈ Server now ready on http://localhost:8888
+   [functions] ◈ Server now ready on http://localhost:9000
    [ngrok] ✅ Tunnel established!
    [ngrok] 📡 Public URL: https://xxxx.ngrok-free.app
-   [ngrok] 🔧 Functions: https://xxxx.ngrok-free.app/.netlify/functions
+   [ngrok] 🔧 Functions: https://xxxx.ngrok-free.app/api
    [ngrok] 📝 Updated mobile/.env
    ```
 
@@ -108,7 +108,7 @@ Phone ✅ → Expo Tunnel URL (exp://xxx.tunnelme.com)
 ### Test the ngrok tunnel:
 ```bash
 # The tunnel script will print this command
-curl https://xxxx.ngrok-free.app/.netlify/functions/cards-generate \
+curl https://xxxx.ngrok-free.app/api/cards-generate \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
@@ -117,7 +117,7 @@ curl https://xxxx.ngrok-free.app/.netlify/functions/cards-generate \
 ### Check mobile .env was updated:
 ```bash
 cat mobile/.env
-# Should show: EXPO_PUBLIC_API_URL=https://xxxx.ngrok-free.app/.netlify/functions
+# Should show: EXPO_PUBLIC_API_URL=https://xxxx.ngrok-free.app/api
 ```
 
 ## 🔧 Troubleshooting
@@ -208,7 +208,7 @@ npm run dev:tunnel
 ### 4. Test on multiple devices
 ngrok URL is public! Share with teammates:
 ```
-https://xxxx.ngrok-free.app/.netlify/functions
+https://xxxx.ngrok-free.app/api
 ```
 
 ## 🔒 Security Notes
@@ -246,7 +246,7 @@ https://xxxx.ngrok-free.app/.netlify/functions
                 │ HTTPS Tunnel
                 ↓
 ┌─────────────────────────────────────────┐
-│  WSL2 - Netlify Functions (:8888)       │
+│  WSL2 - Netlify Functions (:9000)       │
 │  cards-generate, cards-search           │
 └───────────────┬─────────────────────────┘
                 │ PostgreSQL
@@ -262,7 +262,7 @@ https://xxxx.ngrok-free.app/.netlify/functions
 1. **Verify Netlify Functions work locally:**
    ```bash
    npm run dev:functions
-   curl http://localhost:8888/.netlify/functions/cards-generate -X POST \
+   curl http://localhost:9000/api/cards-generate -X POST \
      -H "Content-Type: application/json" \
      -d '{"name":"Mike Trout","year":"2021"}'
    ```

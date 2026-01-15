@@ -21,7 +21,7 @@ Netlify Dev tries to set up **Edge Functions** (Deno runtime) automatically. Edg
 Despite the error, test that everything works:
 
 ```bash
-curl "http://localhost:8888/.netlify/functions/cards-generate" \
+curl "http://localhost:9000/api/cards-generate" \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
@@ -66,7 +66,7 @@ Kill the existing processes:
 
 ```bash
 lsof -ti:8081 | xargs kill -9
-lsof -ti:8888 | xargs kill -9
+lsof -ti:9000 | xargs kill -9
 ```
 
 Or use `pkill`:
@@ -127,7 +127,7 @@ Function not found...
 
 **Local development:**
 ```
-http://localhost:8888/.netlify/functions/cards-generate
+http://localhost:9000/api/cards-generate
 ```
 
 **Production:**
@@ -135,7 +135,7 @@ http://localhost:8888/.netlify/functions/cards-generate
 https://your-site.netlify.app/api/cards-generate
 ```
 
-Note: `/api/*` redirects to `/.netlify/functions/*` in production (see `netlify.toml`)
+Note: `/api/*` redirects to `/api/*` in production (see `netlify.toml`)
 
 **2. Verify function files exist:**
 ```bash
@@ -172,12 +172,12 @@ cat mobile/.env
 
 Should show:
 ```
-EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions
+EXPO_PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 Or for WSL2 tunnel mode:
 ```
-EXPO_PUBLIC_API_URL=https://xxxx.ngrok-free.app/.netlify/functions
+EXPO_PUBLIC_API_URL=https://xxxx.ngrok-free.app/api
 ```
 
 **2. Restart Expo after changing .env:**
@@ -185,7 +185,7 @@ Press `r` in Expo terminal, or shake device and tap "Reload"
 
 **3. Verify backend is running:**
 ```bash
-curl http://localhost:8888/.netlify/functions/cards-generate \
+curl http://localhost:9000/api/cards-generate \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'

@@ -377,7 +377,7 @@ NODE_ENV=development
 
 **Frontend** (add to `mobile/.env`):
 ```
-EXPO_PUBLIC_API_URL=http://localhost:8888/api
+EXPO_PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 ---
@@ -399,12 +399,12 @@ psql $DATABASE_URL -c "\dt users"
 ### API Issues
 ```bash
 # Test registration
-curl -X POST http://localhost:8888/api/auth/register \
+curl -X POST http://localhost:9000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","username":"testuser","password":"SecurePass123"}'
 
 # Check auth token
-curl -X GET http://localhost:8888/api/inventory/cards \
+curl -X GET http://localhost:9000/api/inventory/cards \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 

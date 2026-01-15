@@ -48,13 +48,13 @@
 ### Backend (Netlify Functions + PostgreSQL)
 
 #### Serverless Functions (TypeScript)
-- ✅ **cards/generate.ts** - POST /api/cards/generate
+- ✅ **cards-generate.ts** - POST /api/cards-generate
   - Generate player cards from MLB stats
   - Database caching to avoid repeated API calls
   - Returns card data with cache status
   - **Note:** Stub implementation, needs mlb_showdown_card_bot integration
 
-- ✅ **cards/search.ts** - GET /api/cards/search
+- ✅ **cards-search.ts** - GET /api/cards-search
   - Query cached cards by name, year, type, points
   - Parameterized SQL queries
   - Returns filtered card list
@@ -196,7 +196,7 @@ npm test -- --watch      # Watch mode
 ### Backend Development
 ```bash
 npm install              # Install root dependencies
-npm run dev:functions    # Start Netlify dev server (port 8888)
+npm run dev:functions    # Start Netlify dev server (port 9000)
 npm run db:migrate       # Run database migration
 ```
 
@@ -259,7 +259,7 @@ netlify deploy --prod    # Production deploy
 ## ⚠️ Known Limitations
 
 ### Critical Blockers
-1. **Card Generation Stub** - `generateCard()` function in `netlify/functions/cards/generate.ts` throws error
+1. **Card Generation Stub** - `generateCard()` function in `netlify/functions/cards-generate.ts` throws error
    - Needs integration with `mlb_showdown_card_bot` Python package
    - Options: Python subprocess, TypeScript port, or Baseball Reference API
    - See NEXT_STEPS.md for implementation approaches

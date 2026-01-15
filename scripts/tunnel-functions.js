@@ -36,7 +36,7 @@ async function waitForPort() {
   while (Date.now() - startTime < HEALTH_CHECK_TIMEOUT) {
     try {
       await new Promise((resolve, reject) => {
-        const req = http.get(`http://localhost:${PORT}/.netlify/functions/cards-generate`, () => {
+        const req = http.get(`http://localhost:${PORT}/api/cards-generate`, () => {
           // Any response is fine - we just need the port to be listening
           resolve();
         });
@@ -82,19 +82,19 @@ async function startTunnel() {
     });
 
     const url = listener.url();
-    const functionsUrl = `${url}/.netlify/functions`;
+    const apiUrl = `${url}/api`;
 
     console.log('\n✅ Tunnel established!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`📡 Public URL: ${url}`);
-    console.log(`🔧 Functions: ${functionsUrl}`);
+    console.log(`🔧 API Base: ${apiUrl}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-    updateMobileEnv(functionsUrl);
+    updateMobileEnv(apiUrl);
 
     console.log('💡 Tunnel will stay open. Press Ctrl+C to stop.\n');
     console.log('🧪 Test with:');
-    console.log(`   curl ${functionsUrl}/cards-generate -X POST -H "Content-Type: application/json" -d '{"name":"Mike Trout","year":"2021"}'\n`);
+    console.log(`   curl ${apiUrl}/cards-generate -X POST -H "Content-Type: application/json" -d '{"name":"Mike Trout","year":"2021"}'\n`);
 
     // Keep stdin open to keep the process alive
     process.stdin.resume();
@@ -145,7 +145,7 @@ async function startTunnel() {
   }
 }
 
-function updateMobileEnv(functionsUrl) {
+function updateMobileEnv(apiUrl) {
   try {
     let envContent = '';
 
@@ -157,18 +157,18 @@ function updateMobileEnv(functionsUrl) {
       return !line.startsWith('EXPO_PUBLIC_API_URL');
     });
 
-    lines.push(`EXPO_PUBLIC_API_URL=${functionsUrl}`);
+    lines.push(`EXPO_PUBLIC_API_URL=${apiUrl}`);
 
     fs.writeFileSync(ENV_FILE, lines.join('\n'));
 
-    console.log(`📝 Updated mobile/.env.tunnel`);
-    console.log(`   EXPO_PUBLIC_API_URL=${functionsUrl}`);
+    console.log('📝 Updated mobile/.env.tunnel');
+    console.log(`   EXPO_PUBLIC_API_URL=${apiUrl}`);
     console.log('⚠️  IMPORTANT: Restart Expo to apply changes!');
     console.log('   Press "r" in the Expo terminal to reload\n');
   } catch (error) {
     console.warn('⚠️  Could not update mobile/.env.tunnel:', error.message);
-    console.log(`\n   Manually add to mobile/.env.tunnel:`);
-    console.log(`   EXPO_PUBLIC_API_URL=${functionsUrl}\n`);
+    console.log('\n   Manually add to mobile/.env.tunnel:');
+    console.log(`   EXPO_PUBLIC_API_URL=${apiUrl}\n`);
   }
 }
 

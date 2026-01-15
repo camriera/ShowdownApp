@@ -38,8 +38,8 @@ Complete technical architecture for the Showdown Simulator project.
 │  │         Serverless Functions (TypeScript)            │   │
 │  │                                                       │   │
 │  │  Cards:                                              │   │
-│  │  - /cards/generate  POST   Generate player card      │   │
-│  │  - /cards/search    GET    Query cached cards        │   │
+│  │  - /cards-generate  POST   Generate player card      │   │
+│  │  - /cards-search    GET    Query cached cards        │   │
 │  │                                                       │   │
 │  │  Games (future):                                     │   │
 │  │  - /games/create    POST   Start new game            │   │
@@ -135,13 +135,11 @@ ShowdownApp/
 │
 ├── netlify/
 │   └── functions/                   # Serverless functions
-│       ├── cards/
-│       │   ├── generate.ts          # POST /api/cards/generate
-│       │   └── search.ts            # GET /api/cards/search
+│       ├── cards-generate.ts        # POST /api/cards-generate
+│       ├── cards-search.ts          # GET /api/cards-search
 │       ├── games/                   # Future: game endpoints
 │       ├── rosters/                 # Future: roster endpoints
-│       └── utils/
-│           └── db.ts                # Database connection pool
+│       └── db.ts                    # Database connection pool
 │
 ├── database/
 │   ├── schema.sql                   # PostgreSQL schema
@@ -317,7 +315,7 @@ if (battersFaced > pitcher.ip * 3) { // 3 batters per IP
 
 ### Cards API
 
-**POST /api/cards/generate**
+**POST /api/cards-generate**
 ```json
 Request:
 {
@@ -334,7 +332,7 @@ Response:
 }
 ```
 
-**GET /api/cards/search**
+**GET /api/cards-search**
 ```
 Query params:
 - name (string, optional): Filter by player name
@@ -535,7 +533,7 @@ cd mobile && npm test
 npm run deploy
 
 # 3. Test production endpoints
-curl https://your-site.netlify.app/.netlify/functions/cards/search
+curl https://your-site.netlify.app/api/cards-search
 
 # 4. Build mobile app (future)
 cd mobile && eas build

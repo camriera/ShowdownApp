@@ -33,7 +33,7 @@ npm test                 # Run mobile tests
 
 ### Generate Card
 ```bash
-POST http://localhost:8888/.netlify/functions/cards/generate
+POST http://localhost:9000/api/cards-generate
 Content-Type: application/json
 
 {
@@ -44,13 +44,13 @@ Content-Type: application/json
 
 ### Search Cards
 ```bash
-GET http://localhost:8888/.netlify/functions/cards/search?name=Trout&year=2021
+GET http://localhost:9000/api/cards-search?name=Trout&year=2021
 ```
 
 ## 🧪 Quick Test
 
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
@@ -60,7 +60,7 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
 - **Dev Server**: http://localhost:8081
 - **API Config**: `mobile/.env`
   ```
-  EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions
+  EXPO_PUBLIC_API_URL=http://localhost:9000/api
   ```
 
 ## 🔧 Environment Files
@@ -73,7 +73,7 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
 
 - **Mobile `.env`**: API endpoint for mobile app
   ```
-  EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions
+  EXPO_PUBLIC_API_URL=http://localhost:9000/api
   ```
 
 ## 🐛 Common Fixes
@@ -96,8 +96,7 @@ npm run db:test          # Check connection
 ### Function not found
 ```bash
 # Verify URL format
-http://localhost:8888/.netlify/functions/cards/generate
-# NOT: http://localhost:8888/api/cards/generate (production only)
+http://localhost:9000/api/cards-generate
 ```
 
 ## 📚 Documentation
@@ -157,7 +156,7 @@ git push origin main
 ## 📊 Ports
 
 - **Mobile App**: 8081 (Expo Dev Server)
-- **Backend API**: 8888 (Netlify Dev)
+- **Backend API**: 9000 (Netlify Dev)
 - **Alt Functions**: 9999 (Direct Functions Server)
 
 ## 🆘 Need Help?

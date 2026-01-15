@@ -12,11 +12,24 @@ import Animated, {
 } from 'react-native-reanimated';
 import { COLORS, FONT_SIZES, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
+type ToastType = 
+  // New types for game outcomes
+  | 'advantage'           // Yellow - both pitcher and batter advantage
+  | 'batting-safe'        // Green - batting perspective, got on base (hit, walk)
+  | 'batting-out'         // Red - batting perspective, made an out (SO, GB, FB)
+  | 'pitching-safe'       // Red - pitching perspective, batter got on base
+  | 'pitching-out'        // Green - pitching perspective, batter made an out
+  | 'score'               // Gold - runs scored
+  // Legacy types (backward compatibility)
+  | 'positive'
+  | 'negative'
+  | 'neutral';
+
 interface GameEventToastProps {
   message: string;
   isVisible: boolean;
   onAnimationComplete?: () => void;
-  type?: 'positive' | 'negative' | 'neutral' | 'score';
+  type?: ToastType;
 }
 
 export const GameEventToast: React.FC<GameEventToastProps> = ({
@@ -71,19 +84,16 @@ export const GameEventToast: React.FC<GameEventToastProps> = ({
   }));
 
   const getBackgroundColor = () => {
-    // 95% opacity
     switch (type) {
+      case 'advantage': return COLORS.advantage + 'b0';
+      case 'batting-safe': return COLORS.success + 'b0';
+      case 'batting-out': return COLORS.error + 'b0';
+      case 'pitching-safe': return COLORS.error + 'b0';
+      case 'pitching-out': return COLORS.success + 'b0';
+      case 'score': return COLORS.success + 'b0';
       case 'positive': return COLORS.success + 'b0';
       case 'negative': return COLORS.error + 'b0';
-      case 'score': return COLORS.textGold + 'b0';
       default: return '#333333b0';
-    }
-  };
-
-  const getTextColor = () => {
-    switch (type) {
-      case 'score': return '#000';
-      default: return '#FFF';
     }
   };
 
@@ -96,7 +106,7 @@ export const GameEventToast: React.FC<GameEventToastProps> = ({
           { backgroundColor: getBackgroundColor() }
         ]}
       >
-        <Text style={[styles.text, { color: getTextColor() }]}>
+        <Text style={[styles.text, { color: COLORS.textPrimary }]}>
           {message}
         </Text>
       </Animated.View>

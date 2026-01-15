@@ -1,5 +1,11 @@
 import { HitterCard, PitcherCard, ChartEntry, ChartResult } from '../models/Card';
 import { GameState, GamePhase, Advantage, AtBatResult, BaseRunners } from '../models/Game';
+import { 
+  processWalkAdvancement, 
+  processGroundBallForceOut, 
+  processFlyBallOut,
+  advanceRunnersByBases 
+} from '../utils/baserunningUtils';
 
 export class GameEngine {
   private state: GameState;
@@ -118,14 +124,19 @@ export class GameEngine {
         result = this.recordOut(chartResult);
         break;
       case 'GB':
+        result = this.handleGroundBall();
+        break;
       case 'FB':
-        result = this.handleFieldedBall(chartResult);
+        result = this.handleFlyBall();
         break;
       case 'BB':
         result = this.handleWalk();
         break;
       case '1B':
         result = this.handleSingle();
+        break;
+      case '1B+':
+        result = this.handleSinglePlus();
         break;
       case '2B':
         result = this.handleDouble();
@@ -182,32 +193,34 @@ export class GameEngine {
     };
   }
 
-  private handleFieldedBall(type: ChartResult): AtBatResult {
+  private handleGroundBall(): AtBatResult {
+    const batter = this.getCurrentBatter();
+    const { newBases, runsScored } = processGroundBallForceOut(this.state.bases, batter);
+    
     return {
       isOut: true,
       outsRecorded: 1,
-      runsScored: 0,
-      newBaseState: { ...this.state.bases },
-      description: type === 'GB' ? 'Ground Out' : 'Fly Out',
+      runsScored,
+      newBaseState: newBases,
+      description: 'Ground Out',
+    };
+  }
+
+  private handleFlyBall(): AtBatResult {
+    const { newBases, runsScored } = processFlyBallOut(this.state.bases, this.state.outs);
+    
+    return {
+      isOut: true,
+      outsRecorded: 1,
+      runsScored,
+      newBaseState: newBases,
+      description: runsScored > 0 ? 'Sacrifice Fly' : 'Fly Out',
     };
   }
 
   private handleWalk(): AtBatResult {
-    const newBases = { ...this.state.bases };
     const batter = this.getCurrentBatter();
-    let runsScored = 0;
-    
-    if (newBases.first && newBases.second && newBases.third) {
-      runsScored = 1;
-    }
-    
-    if (newBases.second && newBases.third) {
-      newBases.third = newBases.second;
-    }
-    if (newBases.first) {
-      newBases.second = newBases.first;
-    }
-    newBases.first = batter;
+    const { newBases, runsScored } = processWalkAdvancement(this.state.bases, batter);
     
     return {
       isOut: false,
@@ -235,6 +248,26 @@ export class GameEngine {
       runsScored,
       newBaseState: newBases,
       description: 'Single',
+    };
+  }
+
+  private handleSinglePlus(): AtBatResult {
+    const newBases: BaseRunners = { first: null, second: null, third: null };
+    const batter = this.getCurrentBatter();
+    let runsScored = 0;
+    
+    if (this.state.bases.third) runsScored++;
+    if (this.state.bases.second) runsScored++;
+    
+    newBases.second = this.state.bases.first;
+    newBases.first = batter;
+    
+    return {
+      isOut: false,
+      outsRecorded: 0,
+      runsScored,
+      newBaseState: newBases,
+      description: 'Single+',
     };
   }
 

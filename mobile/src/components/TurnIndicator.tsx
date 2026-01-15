@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
 
@@ -13,23 +13,35 @@ export const PassDevicePrompt: React.FC<PassDevicePromptProps> = ({
   nextTeamName,
   onReady,
 }) => {
+  const [showPrompt, setShowPrompt] = useState(false);
   const teamColor = nextTeam === 'home' ? COLORS.homeTeam : COLORS.awayTeam;
+
+  useEffect(() => {
+    setShowPrompt(false);
+    const timer = setTimeout(() => {
+      setShowPrompt(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <View style={styles.passDeviceOverlay}>
-      <TouchableOpacity onPress={onReady} activeOpacity={0.9}>
-        <View style={styles.passDeviceCard}>
-          <Text style={styles.passDeviceTitle}>PASS THE DEVICE</Text>
-          <View style={[styles.passDeviceTeamBadge, { backgroundColor: teamColor }]}>
-            <Text style={styles.passDeviceTeamText}>
-              {nextTeamName.toUpperCase()}
+      {showPrompt && (
+        <TouchableOpacity onPress={onReady} activeOpacity={0.9}>
+          <View style={styles.passDeviceCard}>
+            <Text style={styles.passDeviceTitle}>PASS THE DEVICE</Text>
+            <View style={[styles.passDeviceTeamBadge, { backgroundColor: teamColor }]}>
+              <Text style={styles.passDeviceTeamText}>
+                {nextTeamName.toUpperCase()}
+              </Text>
+            </View>
+            <Text style={styles.passDeviceSubtext}>
+              Tap when {nextTeamName} is ready
             </Text>
           </View>
-          <Text style={styles.passDeviceSubtext}>
-            Tap when {nextTeamName} is ready
-          </Text>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

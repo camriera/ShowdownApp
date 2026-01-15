@@ -43,7 +43,7 @@ To: `import { getPool } from './db'`
 ```toml
 [dev]
   framework = "#static"
-  port = 8888
+  port = 9000
   autoLaunch = false
 ```
 
@@ -66,13 +66,13 @@ npm run dev
 ```
 
 - ✅ Mobile app: `http://localhost:8081` (Expo Dev Server)
-- ✅ Backend API: `http://localhost:8888` (Netlify Dev Server)
+- ✅ Backend API: `http://localhost:9000` (Netlify Dev Server)
 
 ## 📡 Working API Endpoints
 
 ### Generate Card
 ```bash
-POST http://localhost:8888/.netlify/functions/cards-generate
+POST http://localhost:9000/api/cards-generate
 
 {
   "name": "Mike Trout",
@@ -82,13 +82,13 @@ POST http://localhost:8888/.netlify/functions/cards-generate
 
 ### Search Cards
 ```bash
-GET http://localhost:8888/.netlify/functions/cards-search?name=Trout
+GET http://localhost:9000/api/cards-search?name=Trout
 ```
 
 ## 🧪 Verified Working
 
 ```bash
-curl "http://localhost:8888/.netlify/functions/cards-generate" \
+curl "http://localhost:9000/api/cards-generate" \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'

@@ -8,7 +8,7 @@ Quick reference for all available npm scripts in the Showdown App project.
 ```bash
 npm run dev
 ```
-Starts both mobile app (port 8081) and Netlify functions (port 8888) concurrently with colored output.
+Starts both mobile app (port 8081) and Netlify functions (port 9000) concurrently with colored output.
 
 ### Mobile App Only
 ```bash
@@ -24,7 +24,7 @@ Starts Expo development server for the React Native app.
 npm run dev:functions
 ```
 Starts Netlify Dev server with functions.
-- Functions available at `http://localhost:8888/.netlify/functions/`
+- Functions available at `http://localhost:9000/api/`
 - Auto-compiles TypeScript with esbuild
 - Supports hot reload
 
@@ -207,9 +207,9 @@ If ports are in use:
 
 | Script | Purpose | Output |
 |--------|---------|--------|
-| `dev` | Start full stack | Mobile (8081) + Functions (8888) |
+| `dev` | Start full stack | Mobile (8081) + Functions (9000) |
 | `dev:mobile` | Start mobile only | Expo server (8081) |
-| `dev:functions` | Start backend only | Netlify Dev (8888) |
+| `dev:functions` | Start backend only | Netlify Dev (9000) |
 | `dev:functions-only` | Start functions direct | Functions server (9999) |
 | `db:test` | Test DB connection | ✅ or ❌ with timestamp |
 | `db:migrate` | Run migrations | Creates tables |
@@ -229,10 +229,10 @@ Make sure you're in the root directory of the project.
 Run `npm install` in root and `cd mobile && npm install`.
 
 ### Port already in use
-Kill processes using ports 8081 or 8888:
+Kill processes using ports 8081 or 9000:
 ```bash
 lsof -ti:8081 | xargs kill
-lsof -ti:8888 | xargs kill
+lsof -ti:9000 | xargs kill
 ```
 
 ### Database scripts fail

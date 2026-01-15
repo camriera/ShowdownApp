@@ -27,8 +27,8 @@ Bring the beloved tabletop baseball simulation to mobile devices with:
 ┌──────────────────────────────────────────┐
 │    Netlify Functions (Serverless)        │
 │  ┌────────────────────────────────────┐  │
-│  │  /api/cards/generate  (POST)       │  │
-│  │  /api/cards/search    (GET)        │  │
+│  │  /api/cards-generate  (POST)       │  │
+│  │  /api/cards-search    (GET)        │  │
 │  └────────────────────────────────────┘  │
 └──────────────────────────────────────────┘
               │ PostgreSQL │

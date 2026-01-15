@@ -102,7 +102,7 @@ npm run db:populate
    ↓
 4. Card data + image URL saved to PostgreSQL
    ↓
-5. Mobile app calls /api/cards/search
+5. Mobile app calls /api/cards-search
    ↓
 6. Netlify function queries PostgreSQL
    ↓
@@ -117,8 +117,8 @@ npm run db:populate
 |-----------|--------------|---------|
 | `populateCards.js` | `showdownbot.com/api/build_custom_card` | Fetch card data |
 | `populateCards.js` | `showdownbot.com/api/build_image_for_card` | Generate card images |
-| `teamLoader.ts` | `/api/cards/search` (internal) | Retrieve cached cards |
-| `netlify/functions/cards/generate.ts` | `showdownbot.com/api/*` | On-demand card generation |
+| `teamLoader.ts` | `/api/cards-search` (internal) | Retrieve cached cards |
+| `netlify/functions/cards-generate.ts` | `showdownbot.com/api/*` | On-demand card generation |
 
 ### Database Schema
 

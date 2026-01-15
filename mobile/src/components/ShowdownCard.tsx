@@ -17,6 +17,8 @@ interface ShowdownCardProps {
   hasAdvantage?: boolean;
   onPress?: () => void;
   compact?: boolean;
+  headerOnly?: boolean;
+  imageOnly?: boolean;
   style?: ViewStyle;
   fatiguedControl?: number;
   showThumbnail?: boolean;
@@ -27,6 +29,8 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   isActive = false,
   hasAdvantage = false,
   compact = false,
+  headerOnly = false,
+  imageOnly = false,
   style,
   fatiguedControl,
   showThumbnail = true,
@@ -84,8 +88,56 @@ export const ShowdownCard: React.FC<ShowdownCardProps> = ({
   // If fatigued, we display the fatigued value.
   const displayValue = isFatigued ? fatiguedControl : mainStatValue;
 
+  // Image-only mode: just show the card image as background (for runners on base)
+  if (imageOnly) {
+    return (
+      <Animated.View style={[styles.container, styles.compactContainer, animatedStyle, style]}>
+        {/* Card Image as background */}
+        {card.imageUrl && (
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={styles.compactImage}
+            resizeMode="cover"
+            onError={() => {}}
+          />
+        )}
+      </Animated.View>
+    );
+  }
+
   // Compact mode: show card image with name and control stat overlaid
   if (compact) {
+    // Header-only variant: just show player name above image
+    if (headerOnly) {
+      return (
+        <Animated.View style={[styles.container, styles.compactContainer, animatedStyle, style]}>
+          {/* Animated Glow Background */}
+          <Animated.View style={[styles.glow, glowStyle]} />
+
+          {/* Card Image as background */}
+          {card.imageUrl && (
+            <Image
+              source={{ uri: card.imageUrl }}
+              style={styles.compactImage}
+              resizeMode="cover"
+              onError={() => {}}
+            />
+          )}
+
+          {/* Header overlay with player name only */}
+          <View style={styles.compactHeaderOverlay}>
+            <Text style={styles.compactPlayerName} numberOfLines={1}>{card.name}</Text>
+          </View>
+
+          {hasAdvantage && (
+            <View style={styles.advantageBanner}>
+              <Text style={styles.advantageText}>ADV</Text>
+            </View>
+          )}
+        </Animated.View>
+      );
+    }
+
     return (
       <Animated.View style={[styles.container, styles.compactContainer, animatedStyle, style]}>
         {/* Animated Glow Background */}
@@ -201,7 +253,7 @@ const styles = StyleSheet.create({
   },
   compactContainer: {
     width: 130,
-    height: 160,
+    height: 180,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',

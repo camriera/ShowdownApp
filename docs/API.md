@@ -48,7 +48,7 @@ GET /health
 ### 2. Generate Player Card
 
 ```http
-POST /api/cards/generate
+POST /api/cards-generate
 ```
 
 **Description**: Generate a Showdown player card from MLB statistics
@@ -149,7 +149,7 @@ POST /api/cards/generate
 ### 3. Search Players
 
 ```http
-GET /api/cards/search?query={name}&year={year}&limit={limit}
+GET /api/cards-search?query={name}&year={year}&limit={limit}
 ```
 
 **Description**: Search for players by name
@@ -163,7 +163,7 @@ GET /api/cards/search?query={name}&year={year}&limit={limit}
 
 **Example Request**:
 ```http
-GET /api/cards/search?query=trout&year=2021&limit=5
+GET /api/cards-search?query=trout&year=2021&limit=5
 ```
 
 **Response**:
@@ -425,8 +425,8 @@ interface PitcherPlayer extends PlayerCard {
 
 | Endpoint | Limit | Window | Notes |
 |----------|-------|--------|-------|
-| `/api/cards/generate` | 60 requests | 1 minute | Baseball Reference limitation |
-| `/api/cards/search` | 120 requests | 1 minute | Lighter database queries |
+| `/api/cards-generate` | 60 requests | 1 minute | Baseball Reference limitation |
+| `/api/cards-search` | 120 requests | 1 minute | Lighter database queries |
 | `/api/rosters/validate` | 30 requests | 1 minute | Complex calculations |
 | All others | 300 requests | 1 minute | General limit |
 

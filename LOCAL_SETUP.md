@@ -40,7 +40,7 @@ NODE_ENV=development
 
 **Mobile `.env` file** (already created):
 ```env
-EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions
+EXPO_PUBLIC_API_URL=http://localhost:9000/api
 ```
 
 ### 3. Setup Database
@@ -73,7 +73,7 @@ npm run dev
 
 This will start:
 - **Mobile App**: http://localhost:8081 (Expo Dev Server)
-- **Backend API**: http://localhost:8888 (Netlify Dev Server)
+- **Backend API**: http://localhost:9000 (Netlify Dev Server)
 
 You can scan the QR code with Expo Go app to run on your phone.
 
@@ -102,14 +102,14 @@ npm run android
 
 **Generate a card:**
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
 
 **Search cards:**
 ```bash
-curl http://localhost:8888/.netlify/functions/cards/search?name=Trout
+curl http://localhost:9000/api/cards-search?name=Trout
 ```
 
 ### Test from mobile app
@@ -171,7 +171,7 @@ npm install pg
 
 **Error: "Function not found"**
 - Make sure Netlify Dev is running: `npm run dev:functions`
-- Verify URL pattern: `http://localhost:8888/.netlify/functions/cards/generate`
+- Verify URL pattern: `http://localhost:9000/api/cards-generate`
 - Check `netlify.toml` configuration
 
 **Functions not compiling TypeScript**
@@ -204,12 +204,12 @@ npx expo start --clear
 # Mobile app on http://localhost:8081
 
 # Terminal 2: Should show Netlify Dev Server
-# Functions on http://localhost:8888
+# Functions on http://localhost:9000
 ```
 
 ### 2. Test API endpoint in browser:
 ```
-http://localhost:8888/.netlify/functions/cards/generate
+http://localhost:9000/api/cards-generate
 ```
 Should return: `{"error":"Method not allowed"}` (because it's a POST endpoint)
 

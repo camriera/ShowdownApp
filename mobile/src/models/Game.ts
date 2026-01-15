@@ -1,5 +1,6 @@
 import { HitterCard, PitcherCard } from './Card';
 
+export type { HitterCard, PitcherCard };
 export type GamePhase = 'PITCH' | 'ADVANTAGE' | 'SWING' | 'RESULT' | 'BETWEEN_BATTERS';
 export type Advantage = 'PITCHER' | 'BATTER';
 

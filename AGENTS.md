@@ -73,26 +73,26 @@ npm run type-check             # TypeScript type checking
 # The backend runs via Netlify CLI - use root-level commands
 
 # Local development
-npm run dev                    # Start functions at http://localhost:8888/.netlify/functions/
+npm run dev                    # Start functions at http://localhost:9000/api/
 
 # Functions are accessible at:
-# POST http://localhost:8888/.netlify/functions/cards-generate
-# GET  http://localhost:8888/.netlify/functions/cards-search
+# POST http://localhost:9000/api/cards-generate
+# GET  http://localhost:9000/api/cards-search
 
 # Or via API redirect:
-# POST http://localhost:8888/api/cards-generate
-# GET  http://localhost:8888/api/cards-search
+# POST http://localhost:9000/api/cards-generate
+# GET  http://localhost:9000/api/cards-search
 ```
 
 ### Testing with curl
 ```bash
 # Generate a card
-curl -X POST http://localhost:8888/api/cards-generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 
 # Search cached cards
-curl http://localhost:8888/api/cards-search?name=Trout
+curl http://localhost:9000/api/cards-search?name=Trout
 ```
 
 ## 📝 Code Style Guidelines
@@ -202,7 +202,7 @@ type Result<T, E = Error> = { success: true; data: T } | { success: false; error
 
 const generateCard = async (name: string, year: string): Promise<Result<PlayerCard>> => {
   try {
-    const response = await fetch(`/api/cards/generate`, {
+    const response = await fetch(`/api/cards-generate`, {
       method: 'POST',
       body: JSON.stringify({ name, year }),
     });

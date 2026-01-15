@@ -18,15 +18,15 @@ npm run dev:functions
 Should see:
 ```
 ◈ Netlify Dev ◈
-◈ Loaded function cards/generate http://localhost:8888/.netlify/functions/cards/generate
-◈ Loaded function cards/search http://localhost:8888/.netlify/functions/cards/search
+◈ Loaded function cards/generate http://localhost:9000/api/cards-generate
+◈ Loaded function cards/search http://localhost:9000/api/cards-search
 ```
 
 ### 3. Test Generate Card Endpoint
 
 **Using curl:**
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Mike Trout",
@@ -36,7 +36,7 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
 
 **Using httpie (if installed):**
 ```bash
-http POST localhost:8888/.netlify/functions/cards/generate \
+http POST localhost:9000/api/cards-generate \
   name="Mike Trout" \
   year="2021"
 ```
@@ -66,17 +66,17 @@ http POST localhost:8888/.netlify/functions/cards/generate \
 
 **Search by name:**
 ```bash
-curl "http://localhost:8888/.netlify/functions/cards/search?name=Trout"
+curl "http://localhost:9000/api/cards-search?name=Trout"
 ```
 
 **Search by year:**
 ```bash
-curl "http://localhost:8888/.netlify/functions/cards/search?year=2021"
+curl "http://localhost:9000/api/cards-search?year=2021"
 ```
 
 **Search by player type:**
 ```bash
-curl "http://localhost:8888/.netlify/functions/cards/search?playerType=Hitter"
+curl "http://localhost:9000/api/cards-search?playerType=Hitter"
 ```
 
 ## 🎯 Test Different Players
@@ -85,20 +85,20 @@ Try generating these popular players:
 
 ```bash
 # Modern superstars
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Aaron Judge","year":"2022"}'
 
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Shohei Ohtani","year":"2021"}'
 
 # Legendary pitchers
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Pedro Martinez","year":"2000"}'
 
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Randy Johnson","year":"2001"}'
 ```
@@ -107,7 +107,7 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
 
 ### First Request (generates new card):
 ```bash
-time curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+time curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
@@ -115,7 +115,7 @@ Response will have `"cached": false` and take 5-10 seconds.
 
 ### Second Request (retrieves from cache):
 ```bash
-time curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+time curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
@@ -135,11 +135,11 @@ This shows the top 10 players by point value in your database.
 
 ### Using Browser DevTools Console
 
-Open `http://localhost:8888` in your browser, then open DevTools Console (F12) and run:
+Open `http://localhost:9000` in your browser, then open DevTools Console (F12) and run:
 
 ```javascript
 // Generate a card
-fetch('http://localhost:8888/.netlify/functions/cards/generate', {
+fetch('http://localhost:9000/api/cards-generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ name: 'Mike Trout', year: '2021' })
@@ -148,7 +148,7 @@ fetch('http://localhost:8888/.netlify/functions/cards/generate', {
   .then(data => console.log(data));
 
 // Search cards
-fetch('http://localhost:8888/.netlify/functions/cards/search?name=Trout')
+fetch('http://localhost:9000/api/cards-search?name=Trout')
   .then(r => r.json())
   .then(data => console.log(data));
 ```
@@ -157,7 +157,7 @@ fetch('http://localhost:8888/.netlify/functions/cards/search?name=Trout')
 
 **Generate Card:**
 - Method: `POST`
-- URL: `http://localhost:8888/.netlify/functions/cards/generate`
+- URL: `http://localhost:9000/api/cards-generate`
 - Headers: `Content-Type: application/json`
 - Body (JSON):
   ```json
@@ -170,7 +170,7 @@ fetch('http://localhost:8888/.netlify/functions/cards/search?name=Trout')
 
 **Search Cards:**
 - Method: `GET`
-- URL: `http://localhost:8888/.netlify/functions/cards/search?name=Trout&year=2021`
+- URL: `http://localhost:9000/api/cards-search?name=Trout&year=2021`
 
 ## 🚨 Common Error Responses
 
@@ -223,13 +223,13 @@ Once your backend is running, test it from the mobile app:
 ### Test response times:
 ```bash
 # Generate new card (first time)
-time curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+time curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}' \
   -o /dev/null -s
 
 # Retrieve cached card (second time)
-time curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+time curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}' \
   -o /dev/null -s

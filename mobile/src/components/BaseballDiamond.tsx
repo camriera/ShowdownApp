@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BaseRunners, HitterCard } from '../models/Game';
+import { ShowdownCard } from './ShowdownCard';
 import { COLORS, SHADOWS, SPACING } from '../constants/theme';
 
 interface BaseballDiamondProps {
@@ -16,15 +17,30 @@ const CORNER_DIST = (INFIELD_SIDE / 2) * Math.sqrt(2);
 const BASE_SIZE = 16;
 const CENTER = FIELD_SIZE / 2;
 
-// Card Slot Constants
-const SLOT_WIDTH = 30;
-const SLOT_HEIGHT = 42;
+// Card Slot Constants (20% larger)
+const SLOT_WIDTH = 36;
+const SLOT_HEIGHT = 50;
 
 export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseClick, scale = 1 }) => {
   const getRunnerName = (runner: { name: string } | null) => {
     if (!runner) return '';
-    const parts = runner.name.split(' ');
-    return parts[parts.length - 1].toUpperCase();
+    const parts = runner.name.split(' ').filter(p => p.length > 0);
+    if (parts.length === 0) return '';
+
+    const firstInitial = parts[0][0].toUpperCase();
+
+    // Determine last name, skipping suffixes like Jr, Sr, III, etc.
+    let lastNameIndex = parts.length - 1;
+    const suffixRegex = /^(Jr|Sr|III?|IV|II|V|VI?)\.?$/i;
+    if (suffixRegex.test(parts[lastNameIndex])) {
+      lastNameIndex = Math.max(0, lastNameIndex - 1);
+    }
+
+    const lastName = parts[lastNameIndex].toUpperCase();
+    const nameDisplay = `${firstInitial} ${lastName}`;
+
+    // Truncate if too long to fit in the space
+    return nameDisplay.length > 10 ? nameDisplay.substring(0, 10) : nameDisplay;
   };
 
   const handleBasePress = (runner: HitterCard | null) => {
@@ -37,28 +53,47 @@ export const BaseballDiamond: React.FC<BaseballDiamondProps> = ({ bases, onBaseC
     <View style={[styles.container, { transform: [{ scale }], height: 360 * scale }]}>
       <View style={styles.fieldArea}>
         
-        {/* Card Slots (Underneath bases) */}
-        {/* 2nd Base Slot */}
-        <TouchableOpacity 
-          style={[styles.cardSlot, styles.slotSecond]} 
-          onPress={() => handleBasePress(bases.second)}
-          disabled={!bases.second}
-        />
-        
-        {/* 3rd Base Slot */}
-        <TouchableOpacity 
-          style={[styles.cardSlot, styles.slotThird]} 
-          onPress={() => handleBasePress(bases.third)}
-          disabled={!bases.third}
-        />
-        
-        {/* 1st Base Slot */}
-        <TouchableOpacity 
-          style={[styles.cardSlot, styles.slotFirst]} 
-          onPress={() => handleBasePress(bases.first)}
-          disabled={!bases.first}
-        />
+        {/* Card Slots - 2nd Base */}
+        <View style={[styles.cardSlotContainer, styles.slotSecond]}>
+          <TouchableOpacity
+            style={styles.cardSlot}
+            onPress={() => handleBasePress(bases.second)}
+            disabled={!bases.second}
+          />
+          {bases.second && (
+            <View style={styles.cardOverlay} pointerEvents="none">
+              <ShowdownCard card={bases.second} imageOnly={true} />
+            </View>
+          )}
+        </View>
 
+        {/* Card Slots - 3rd Base */}
+        <View style={[styles.cardSlotContainer, styles.slotThird]}>
+          <TouchableOpacity
+            style={styles.cardSlot}
+            onPress={() => handleBasePress(bases.third)}
+            disabled={!bases.third}
+          />
+          {bases.third && (
+            <View style={styles.cardOverlay} pointerEvents="none">
+              <ShowdownCard card={bases.third} imageOnly={true} />
+            </View>
+          )}
+        </View>
+
+        {/* Card Slots - 1st Base */}
+        <View style={[styles.cardSlotContainer, styles.slotFirst]}>
+          <TouchableOpacity
+            style={styles.cardSlot}
+            onPress={() => handleBasePress(bases.first)}
+            disabled={!bases.first}
+          />
+          {bases.first && (
+            <View style={styles.cardOverlay} pointerEvents="none">
+              <ShowdownCard card={bases.first} imageOnly={true} />
+            </View>
+          )}
+        </View>
 
         {/* Infield Dirt */}
         <View style={styles.infieldDirt} pointerEvents="none">
@@ -213,17 +248,28 @@ const styles = StyleSheet.create({
     marginTop: -BASE_SIZE * 0.35, 
   },
   
-  // Card Slots
-  cardSlot: {
+  cardSlotContainer: {
     position: 'absolute',
     width: SLOT_WIDTH,
     height: SLOT_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardSlot: {
+    ...StyleSheet.absoluteFillObject,
     borderRadius: 2,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
     backgroundColor: 'rgba(0,0,0,0.2)',
     borderStyle: 'dashed',
-    zIndex: 5, 
+    zIndex: 5,
+  },
+  cardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 6,
+    transform: [{ scale: SLOT_WIDTH / 130 }],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   slotSecond: {
     top: CENTER - CORNER_DIST - BASE_SIZE - SLOT_HEIGHT + 10,

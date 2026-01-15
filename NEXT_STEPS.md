@@ -18,8 +18,8 @@ This document tracks the remaining work to complete the Showdown Simulator MVP.
 
 ### Backend (Netlify Functions + Neon PostgreSQL)
 - [x] Netlify Functions structure
-- [x] Card generation endpoint (POST /api/cards/generate) - *stub implementation*
-- [x] Card search endpoint (GET /api/cards/search)
+- [x] Card generation endpoint (POST /api/cards-generate) - *stub implementation*
+- [x] Card search endpoint (GET /api/cards-search)
 - [x] Database utility module with connection pooling
 - [x] PostgreSQL schema with all required tables
 - [x] Root package.json with scripts
@@ -77,14 +77,14 @@ This document tracks the remaining work to complete the Showdown Simulator MVP.
 **Tasks:**
 - [ ] Research `mlb_showdown_card_bot` API and usage
 - [ ] Decide on integration approach (subprocess vs port vs API)
-- [ ] Implement `generateCard()` function in `netlify/functions/cards/generate.ts`
+- [ ] Implement `generateCard()` function in `netlify/functions/cards-generate.ts`
 - [ ] Test with real player names (e.g., "Mike Trout", "2021")
 - [ ] Verify card data structure matches mobile app expectations
 - [ ] Add error handling for invalid players/years
 
 **Test cases:**
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name": "Mike Trout", "year": "2021"}'
 ```
@@ -110,7 +110,7 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
   - `DATABASE_URL` (from Neon)
   - `NODE_ENV=production`
 - [ ] Deploy: `npm run deploy`
-- [ ] Test functions: `curl https://your-site.netlify.app/.netlify/functions/cards/search`
+- [ ] Test functions: `curl https://your-site.netlify.app/api/cards-search`
 - [ ] Verify database connectivity
 
 #### 4. Create Mobile API Client
@@ -128,10 +128,10 @@ curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
 
 **Example implementation:**
 ```typescript
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8888/.netlify/functions';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9000/api';
 
 export async function generateCard(name: string, year: string): Promise<PlayerCard> {
-  const response = await fetch(`${API_URL}/cards/generate`, {
+  const response = await fetch(`${API_URL}/cards-generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, year }),
@@ -147,7 +147,7 @@ export async function generateCard(name: string, year: string): Promise<PlayerCa
 
 export async function searchCards(query: SearchQuery): Promise<PlayerCard[]> {
   const params = new URLSearchParams(query as any);
-  const response = await fetch(`${API_URL}/cards/search?${params}`);
+  const response = await fetch(`${API_URL}/cards-search?${params}`);
   
   if (!response.ok) {
     throw new Error(`Failed to search cards: ${response.statusText}`);
@@ -252,7 +252,7 @@ npm run lint             # Lint code
 ### Backend Development
 ```bash
 npm install              # Install root dependencies
-npm run dev:functions    # Start Netlify dev server (port 8888)
+npm run dev:functions    # Start Netlify dev server (port 9000)
 npm run db:migrate       # Run database migration
 npm run deploy           # Deploy to Netlify production
 ```

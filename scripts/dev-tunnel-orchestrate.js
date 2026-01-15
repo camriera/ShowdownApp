@@ -25,7 +25,7 @@ async function waitForFunctions() {
   while (Date.now() - startTime < HEALTH_CHECK_TIMEOUT) {
     try {
       await new Promise((resolve, reject) => {
-        const req = http.get(`http://localhost:${FUNCTIONS_PORT}/.netlify/functions/cards-generate`, () => {
+        const req = http.get(`http://localhost:${FUNCTIONS_PORT}/api/cards-generate`, () => {
           resolve();
         });
         req.on('error', reject);

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { EmojiPopperEffect } from './CelebrationEffects';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface GameOverOverlayProps {
@@ -24,8 +25,11 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
   const winnerName = winner === 'home' ? homeTeamName : awayTeamName;
   const winnerColor = winner === 'home' ? COLORS.homeTeam : COLORS.awayTeam;
 
+  const celebrationEmojis = ['🏆', '🎆', '🙌', '🎉', '✨', '👏', '💯'];
+
   return (
     <View style={styles.overlay}>
+      <EmojiPopperEffect emojis={celebrationEmojis} />
       <View style={styles.card}>
         <Text style={styles.gameOverText}>GAME OVER</Text>
         

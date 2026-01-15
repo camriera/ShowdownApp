@@ -7,11 +7,9 @@ This directory contains the serverless backend functions for the Showdown App, d
 ```
 netlify/
 ├── functions/
-│   ├── cards/
-│   │   ├── generate.ts    # POST /api/cards/generate - Generate player cards
-│   │   └── search.ts      # GET /api/cards/search - Search cached cards
-│   └── utils/
-│       └── db.ts          # PostgreSQL connection pool
+│   ├── cards-generate.ts  # POST /api/cards-generate - Generate player cards
+│   ├── cards-search.ts    # GET /api/cards-search - Search cached cards
+│   └── db.ts              # PostgreSQL connection pool
 └── tsconfig.json          # TypeScript configuration
 ```
 
@@ -41,14 +39,14 @@ npm run dev
 ```
 This starts:
 - Mobile app on port 8081
-- Netlify Dev server on port 8888
+- Netlify Dev server on port 9000
 
 #### Option 2: Functions Only
 ```bash
 # From root directory
 npm run dev:functions
 ```
-Functions will be available at: `http://localhost:8888/.netlify/functions/`
+Functions will be available at: `http://localhost:9000/api/`
 
 #### Option 3: Direct Functions Server (no mobile)
 ```bash
@@ -68,7 +66,7 @@ This will verify your `DATABASE_URL` is configured correctly.
 
 ### Generate Card
 ```bash
-POST http://localhost:8888/.netlify/functions/cards/generate
+POST http://localhost:9000/api/cards-generate
 
 Request Body:
 {
@@ -87,7 +85,7 @@ Response:
 
 ### Search Cards
 ```bash
-GET http://localhost:8888/.netlify/functions/cards/search?name=Trout&year=2021
+GET http://localhost:9000/api/cards-search?name=Trout&year=2021
 
 Response:
 {
@@ -100,14 +98,14 @@ Response:
 
 ### Generate a card:
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/cards/generate \
+curl -X POST http://localhost:9000/api/cards-generate \
   -H "Content-Type: application/json" \
   -d '{"name":"Mike Trout","year":"2021"}'
 ```
 
 ### Search cards:
 ```bash
-curl http://localhost:8888/.netlify/functions/cards/search?name=Trout
+curl http://localhost:9000/api/cards-search?name=Trout
 ```
 
 ## 📊 Database Schema
@@ -142,7 +140,7 @@ npm run db:populate
 - **Functions directory**: `netlify/functions`
 - **Node bundler**: esbuild (compiles TypeScript automatically)
 - **External modules**: `pg` (native PostgreSQL driver)
-- **Redirects**: `/api/*` → `/.netlify/functions/*`
+- **Redirects**: `/api/*` → `/api/*`
 
 ### Environment Variables
 
@@ -165,13 +163,13 @@ npm run db:populate
 
 ### "Function not found"
 - Ensure you're using the correct URL pattern
-- Local: `http://localhost:8888/.netlify/functions/cards/generate`
-- Production: `https://your-site.netlify.app/api/cards/generate`
+- Local: `http://localhost:9000/api/cards-generate`
+- Production: `https://your-site.netlify.app/api/cards-generate`
 
 ### Mobile app can't connect
-- Verify mobile `.env` has: `EXPO_PUBLIC_API_URL=http://localhost:8888/.netlify/functions`
+- Verify mobile `.env` has: `EXPO_PUBLIC_API_URL=http://localhost:9000/api`
 - Restart Expo after changing `.env` files
-- Check that Netlify Dev is running on port 8888
+- Check that Netlify Dev is running on port 9000
 
 ## 📦 Deployment
 
